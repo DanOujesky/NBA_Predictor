@@ -1,0 +1,540 @@
+2026-03-14 22:44:13,090 | INFO | [1/90] Processing ATL 2023
+2026-03-14 22:44:13,090 | INFO | Fetching ATL season 2023
+2026-03-14 22:44:13,515 | INFO | 82 games collected
+2026-03-14 22:44:16,676 | INFO | [1/90] Processing ATL 2023
+2026-03-14 22:44:16,676 | INFO | Fetching ATL season 2023
+2026-03-14 22:44:17,061 | INFO | 82 games collected
+2026-03-14 22:44:17,516 | INFO | [2/90] Processing BOS 2023
+2026-03-14 22:44:17,516 | INFO | Fetching BOS season 2023
+2026-03-14 22:44:17,724 | INFO | 82 games collected
+2026-03-14 22:44:21,061 | INFO | [2/90] Processing BOS 2023
+2026-03-14 22:44:21,061 | INFO | Fetching BOS season 2023
+2026-03-14 22:44:21,184 | INFO | 82 games collected
+2026-03-14 22:44:21,725 | INFO | [3/90] Processing BRK 2023
+2026-03-14 22:44:21,725 | INFO | Fetching BRK season 2023
+2026-03-14 22:44:22,012 | INFO | 82 games collected
+2026-03-14 22:44:25,185 | INFO | [3/90] Processing BRK 2023
+2026-03-14 22:44:25,185 | INFO | Fetching BRK season 2023
+2026-03-14 22:44:25,292 | INFO | 82 games collected
+2026-03-14 22:44:26,012 | INFO | [4/90] Processing CHO 2023
+2026-03-14 22:44:26,013 | INFO | Fetching CHO season 2023
+2026-03-14 22:44:26,279 | INFO | 82 games collected
+2026-03-14 22:44:29,292 | INFO | [4/90] Processing CHO 2023
+2026-03-14 22:44:29,293 | INFO | Fetching CHO season 2023
+2026-03-14 22:44:29,371 | INFO | 82 games collected
+2026-03-14 22:44:30,280 | INFO | [5/90] Processing CHI 2023
+2026-03-14 22:44:30,280 | INFO | Fetching CHI season 2023
+2026-03-14 22:44:30,497 | INFO | 82 games collected
+2026-03-14 22:44:33,372 | INFO | [5/90] Processing CHI 2023
+2026-03-14 22:44:33,372 | INFO | Fetching CHI season 2023
+2026-03-14 22:44:33,481 | INFO | 82 games collected
+2026-03-14 22:44:34,498 | INFO | [6/90] Processing CLE 2023
+2026-03-14 22:44:34,498 | INFO | Fetching CLE season 2023
+2026-03-14 22:44:34,748 | INFO | 82 games collected
+2026-03-14 22:44:37,481 | INFO | [6/90] Processing CLE 2023
+2026-03-14 22:44:37,481 | INFO | Fetching CLE season 2023
+2026-03-14 22:44:37,569 | INFO | 82 games collected
+2026-03-14 22:44:38,749 | INFO | [7/90] Processing DAL 2023
+2026-03-14 22:44:38,749 | INFO | Fetching DAL season 2023
+2026-03-14 22:44:38,965 | INFO | 82 games collected
+2026-03-14 22:44:41,570 | INFO | [7/90] Processing DAL 2023
+2026-03-14 22:44:41,570 | INFO | Fetching DAL season 2023
+2026-03-14 22:44:41,659 | INFO | 82 games collected
+2026-03-14 22:44:42,966 | INFO | [8/90] Processing DEN 2023
+2026-03-14 22:44:42,966 | INFO | Fetching DEN season 2023
+2026-03-14 22:44:43,211 | INFO | 82 games collected
+2026-03-14 22:44:45,659 | INFO | [8/90] Processing DEN 2023
+2026-03-14 22:44:45,659 | INFO | Fetching DEN season 2023
+2026-03-14 22:44:45,771 | INFO | 82 games collected
+2026-03-14 22:44:47,212 | INFO | [9/90] Processing DET 2023
+2026-03-14 22:44:47,212 | INFO | Fetching DET season 2023
+2026-03-14 22:44:47,430 | INFO | 82 games collected
+2026-03-14 22:44:49,772 | INFO | [9/90] Processing DET 2023
+2026-03-14 22:44:49,772 | INFO | Fetching DET season 2023
+2026-03-14 22:44:49,886 | INFO | 82 games collected
+2026-03-14 22:44:51,431 | INFO | [10/90] Processing GSW 2023
+2026-03-14 22:44:51,431 | INFO | Fetching GSW season 2023
+2026-03-14 22:44:51,684 | INFO | 82 games collected
+2026-03-14 22:44:53,887 | INFO | [10/90] Processing GSW 2023
+2026-03-14 22:44:53,887 | INFO | Fetching GSW season 2023
+2026-03-14 22:44:53,990 | INFO | 82 games collected
+2026-03-14 22:44:55,685 | INFO | [11/90] Processing HOU 2023
+2026-03-14 22:44:55,685 | INFO | Fetching HOU season 2023
+2026-03-14 22:44:55,928 | INFO | 82 games collected
+2026-03-14 22:44:57,990 | INFO | [11/90] Processing HOU 2023
+2026-03-14 22:44:57,990 | INFO | Fetching HOU season 2023
+2026-03-14 22:44:58,092 | INFO | 82 games collected
+2026-03-14 22:44:59,929 | INFO | [12/90] Processing IND 2023
+2026-03-14 22:44:59,929 | INFO | Fetching IND season 2023
+2026-03-14 22:45:00,175 | INFO | 82 games collected
+2026-03-14 22:45:02,093 | INFO | [12/90] Processing IND 2023
+2026-03-14 22:45:02,093 | INFO | Fetching IND season 2023
+2026-03-14 22:45:02,181 | INFO | 82 games collected
+2026-03-14 22:45:04,175 | INFO | [13/90] Processing LAC 2023
+2026-03-14 22:45:04,175 | INFO | Fetching LAC season 2023
+2026-03-14 22:45:04,410 | INFO | 82 games collected
+2026-03-14 22:45:06,181 | INFO | [13/90] Processing LAC 2023
+2026-03-14 22:45:06,181 | INFO | Fetching LAC season 2023
+2026-03-14 22:45:06,285 | INFO | 82 games collected
+2026-03-14 22:45:08,410 | INFO | [14/90] Processing LAL 2023
+2026-03-14 22:45:08,410 | INFO | Fetching LAL season 2023
+2026-03-14 22:45:08,687 | INFO | 82 games collected
+2026-03-14 22:45:10,286 | INFO | [14/90] Processing LAL 2023
+2026-03-14 22:45:10,286 | INFO | Fetching LAL season 2023
+2026-03-14 22:45:10,402 | INFO | 82 games collected
+2026-03-14 22:45:12,687 | INFO | [15/90] Processing MEM 2023
+2026-03-14 22:45:12,687 | INFO | Fetching MEM season 2023
+2026-03-14 22:45:12,912 | INFO | 82 games collected
+2026-03-14 22:45:14,402 | INFO | [15/90] Processing MEM 2023
+2026-03-14 22:45:14,402 | INFO | Fetching MEM season 2023
+2026-03-14 22:45:14,508 | INFO | 82 games collected
+2026-03-14 22:45:16,912 | INFO | [16/90] Processing MIA 2023
+2026-03-14 22:45:16,912 | INFO | Fetching MIA season 2023
+2026-03-14 22:45:17,216 | INFO | 82 games collected
+2026-03-14 22:45:18,509 | INFO | [16/90] Processing MIA 2023
+2026-03-14 22:45:18,509 | INFO | Fetching MIA season 2023
+2026-03-14 22:45:18,613 | INFO | 82 games collected
+2026-03-14 22:45:21,217 | INFO | [17/90] Processing MIL 2023
+2026-03-14 22:45:21,217 | INFO | Fetching MIL season 2023
+2026-03-14 22:45:21,529 | INFO | 82 games collected
+2026-03-14 22:45:22,614 | INFO | [17/90] Processing MIL 2023
+2026-03-14 22:45:22,614 | INFO | Fetching MIL season 2023
+2026-03-14 22:45:22,705 | INFO | 82 games collected
+2026-03-14 22:45:25,530 | INFO | [18/90] Processing MIN 2023
+2026-03-14 22:45:25,530 | INFO | Fetching MIN season 2023
+2026-03-14 22:45:25,752 | INFO | 82 games collected
+2026-03-14 22:45:26,705 | INFO | [18/90] Processing MIN 2023
+2026-03-14 22:45:26,705 | INFO | Fetching MIN season 2023
+2026-03-14 22:45:26,843 | INFO | 82 games collected
+2026-03-14 22:45:29,752 | INFO | [19/90] Processing NOP 2023
+2026-03-14 22:45:29,752 | INFO | Fetching NOP season 2023
+2026-03-14 22:45:30,013 | INFO | 82 games collected
+2026-03-14 22:45:30,843 | INFO | [19/90] Processing NOP 2023
+2026-03-14 22:45:30,843 | INFO | Fetching NOP season 2023
+2026-03-14 22:45:30,936 | INFO | 82 games collected
+2026-03-14 22:45:34,014 | INFO | [20/90] Processing NYK 2023
+2026-03-14 22:45:34,014 | INFO | Fetching NYK season 2023
+2026-03-14 22:45:34,247 | INFO | 82 games collected
+2026-03-14 22:45:34,936 | INFO | [20/90] Processing NYK 2023
+2026-03-14 22:45:34,936 | INFO | Fetching NYK season 2023
+2026-03-14 22:45:35,042 | INFO | 82 games collected
+2026-03-14 22:45:38,247 | INFO | [21/90] Processing OKC 2023
+2026-03-14 22:45:38,247 | INFO | Fetching OKC season 2023
+2026-03-14 22:45:38,520 | INFO | 82 games collected
+2026-03-14 22:45:39,042 | INFO | [21/90] Processing OKC 2023
+2026-03-14 22:45:39,042 | INFO | Fetching OKC season 2023
+2026-03-14 22:45:39,155 | INFO | 82 games collected
+2026-03-14 22:45:42,520 | INFO | [22/90] Processing ORL 2023
+2026-03-14 22:45:42,521 | INFO | Fetching ORL season 2023
+2026-03-14 22:45:42,732 | INFO | 82 games collected
+2026-03-14 22:45:43,155 | INFO | [22/90] Processing ORL 2023
+2026-03-14 22:45:43,155 | INFO | Fetching ORL season 2023
+2026-03-14 22:45:43,235 | INFO | 82 games collected
+2026-03-14 22:45:46,732 | INFO | [23/90] Processing PHI 2023
+2026-03-14 22:45:46,732 | INFO | Fetching PHI season 2023
+2026-03-14 22:45:46,977 | INFO | 82 games collected
+2026-03-14 22:45:47,236 | INFO | [23/90] Processing PHI 2023
+2026-03-14 22:45:47,236 | INFO | Fetching PHI season 2023
+2026-03-14 22:45:47,328 | INFO | 82 games collected
+2026-03-14 22:45:50,978 | INFO | [24/90] Processing PHO 2023
+2026-03-14 22:45:50,978 | INFO | Fetching PHO season 2023
+2026-03-14 22:45:51,219 | INFO | 82 games collected
+2026-03-14 22:45:51,328 | INFO | [24/90] Processing PHO 2023
+2026-03-14 22:45:51,329 | INFO | Fetching PHO season 2023
+2026-03-14 22:45:51,427 | INFO | 82 games collected
+2026-03-14 22:45:55,220 | INFO | [25/90] Processing POR 2023
+2026-03-14 22:45:55,220 | INFO | Fetching POR season 2023
+2026-03-14 22:45:55,428 | INFO | [25/90] Processing POR 2023
+2026-03-14 22:45:55,428 | INFO | Fetching POR season 2023
+2026-03-14 22:45:55,480 | INFO | 82 games collected
+2026-03-14 22:45:55,529 | INFO | 82 games collected
+2026-03-14 22:45:59,480 | INFO | [26/90] Processing SAC 2023
+2026-03-14 22:45:59,480 | INFO | Fetching SAC season 2023
+2026-03-14 22:45:59,530 | INFO | [26/90] Processing SAC 2023
+2026-03-14 22:45:59,530 | INFO | Fetching SAC season 2023
+2026-03-14 22:45:59,718 | INFO | 82 games collected
+2026-03-14 22:45:59,730 | INFO | 82 games collected
+2026-03-14 22:46:03,718 | INFO | [27/90] Processing SAS 2023
+2026-03-14 22:46:03,719 | INFO | Fetching SAS season 2023
+2026-03-14 22:46:03,731 | INFO | [27/90] Processing SAS 2023
+2026-03-14 22:46:03,731 | INFO | Fetching SAS season 2023
+2026-03-14 22:46:03,945 | INFO | 82 games collected
+2026-03-14 22:46:03,950 | INFO | 82 games collected
+2026-03-14 22:46:07,946 | INFO | [28/90] Processing TOR 2023
+2026-03-14 22:46:07,946 | INFO | Fetching TOR season 2023
+2026-03-14 22:46:07,951 | INFO | [28/90] Processing TOR 2023
+2026-03-14 22:46:07,951 | INFO | Fetching TOR season 2023
+2026-03-14 22:46:08,151 | INFO | 82 games collected
+2026-03-14 22:46:08,156 | INFO | 82 games collected
+2026-03-14 22:46:12,152 | INFO | [29/90] Processing UTA 2023
+2026-03-14 22:46:12,152 | INFO | Fetching UTA season 2023
+2026-03-14 22:46:12,157 | INFO | [29/90] Processing UTA 2023
+2026-03-14 22:46:12,157 | INFO | Fetching UTA season 2023
+2026-03-14 22:46:12,355 | INFO | 82 games collected
+2026-03-14 22:46:12,361 | INFO | 82 games collected
+2026-03-14 22:46:16,355 | INFO | [30/90] Processing WAS 2023
+2026-03-14 22:46:16,355 | INFO | Fetching WAS season 2023
+2026-03-14 22:46:16,361 | INFO | [30/90] Processing WAS 2023
+2026-03-14 22:46:16,361 | INFO | Fetching WAS season 2023
+2026-03-14 22:46:16,544 | INFO | 82 games collected
+2026-03-14 22:46:16,552 | INFO | 82 games collected
+2026-03-14 22:46:20,545 | INFO | [31/90] Processing ATL 2024
+2026-03-14 22:46:20,545 | INFO | Fetching ATL season 2024
+2026-03-14 22:46:20,552 | INFO | [31/90] Processing ATL 2024
+2026-03-14 22:46:20,552 | INFO | Fetching ATL season 2024
+2026-03-14 22:46:20,772 | INFO | 82 games collected
+2026-03-14 22:46:20,780 | INFO | 82 games collected
+2026-03-14 22:46:24,772 | INFO | [32/90] Processing BOS 2024
+2026-03-14 22:46:24,772 | INFO | Fetching BOS season 2024
+2026-03-14 22:46:24,781 | INFO | [32/90] Processing BOS 2024
+2026-03-14 22:46:24,781 | INFO | Fetching BOS season 2024
+2026-03-14 22:46:24,994 | INFO | 82 games collected
+2026-03-14 22:46:25,001 | INFO | 82 games collected
+2026-03-14 22:46:28,995 | INFO | [33/90] Processing BRK 2024
+2026-03-14 22:46:28,995 | INFO | Fetching BRK season 2024
+2026-03-14 22:46:29,001 | INFO | [33/90] Processing BRK 2024
+2026-03-14 22:46:29,001 | INFO | Fetching BRK season 2024
+2026-03-14 22:46:29,201 | INFO | 82 games collected
+2026-03-14 22:46:29,214 | INFO | 82 games collected
+2026-03-14 22:46:33,202 | INFO | [34/90] Processing CHO 2024
+2026-03-14 22:46:33,202 | INFO | Fetching CHO season 2024
+2026-03-14 22:46:33,214 | INFO | [34/90] Processing CHO 2024
+2026-03-14 22:46:33,214 | INFO | Fetching CHO season 2024
+2026-03-14 22:46:33,852 | INFO | 82 games collected
+2026-03-14 22:46:33,916 | INFO | 82 games collected
+2026-03-14 22:46:37,853 | INFO | [35/90] Processing CHI 2024
+2026-03-14 22:46:37,853 | INFO | Fetching CHI season 2024
+2026-03-14 22:46:37,917 | INFO | [35/90] Processing CHI 2024
+2026-03-14 22:46:37,917 | INFO | Fetching CHI season 2024
+2026-03-14 22:46:38,061 | INFO | 82 games collected
+2026-03-14 22:46:38,070 | INFO | 82 games collected
+2026-03-14 22:46:42,061 | INFO | [36/90] Processing CLE 2024
+2026-03-14 22:46:42,061 | INFO | Fetching CLE season 2024
+2026-03-14 22:46:42,070 | INFO | [36/90] Processing CLE 2024
+2026-03-14 22:46:42,070 | INFO | Fetching CLE season 2024
+2026-03-14 22:46:42,314 | INFO | 82 games collected
+2026-03-14 22:46:42,321 | INFO | 82 games collected
+2026-03-14 22:46:46,315 | INFO | [37/90] Processing DAL 2024
+2026-03-14 22:46:46,315 | INFO | Fetching DAL season 2024
+2026-03-14 22:46:46,322 | INFO | [37/90] Processing DAL 2024
+2026-03-14 22:46:46,322 | INFO | Fetching DAL season 2024
+2026-03-14 22:46:46,567 | INFO | 82 games collected
+2026-03-14 22:46:46,568 | INFO | 82 games collected
+2026-03-14 22:46:50,567 | INFO | [38/90] Processing DEN 2024
+2026-03-14 22:46:50,567 | INFO | Fetching DEN season 2024
+2026-03-14 22:46:50,569 | INFO | [38/90] Processing DEN 2024
+2026-03-14 22:46:50,569 | INFO | Fetching DEN season 2024
+2026-03-14 22:46:50,790 | INFO | 82 games collected
+2026-03-14 22:46:50,797 | INFO | 82 games collected
+2026-03-14 22:46:54,791 | INFO | [39/90] Processing DET 2024
+2026-03-14 22:46:54,791 | INFO | Fetching DET season 2024
+2026-03-14 22:46:54,797 | INFO | [39/90] Processing DET 2024
+2026-03-14 22:46:54,797 | INFO | Fetching DET season 2024
+2026-03-14 22:46:54,993 | INFO | 82 games collected
+2026-03-14 22:46:54,993 | INFO | 82 games collected
+2026-03-14 22:46:58,994 | INFO | [40/90] Processing GSW 2024
+2026-03-14 22:46:58,994 | INFO | Fetching GSW season 2024
+2026-03-14 22:46:58,994 | INFO | Fetching GSW season 2024
+2026-03-14 22:46:59,303 | INFO | 82 games collected
+2026-03-14 22:46:59,309 | INFO | 82 games collected
+2026-03-14 22:47:03,304 | INFO | [41/90] Processing HOU 2024
+2026-03-14 22:47:03,304 | INFO | Fetching HOU season 2024
+2026-03-14 22:47:03,310 | INFO | [41/90] Processing HOU 2024
+2026-03-14 22:47:03,310 | INFO | Fetching HOU season 2024
+2026-03-14 22:47:04,087 | INFO | 82 games collected
+2026-03-14 22:47:04,087 | INFO | 82 games collected
+2026-03-14 22:47:08,087 | INFO | [42/90] Processing IND 2024
+2026-03-14 22:47:08,087 | INFO | Fetching IND season 2024
+2026-03-14 22:47:08,088 | INFO | [42/90] Processing IND 2024
+2026-03-14 22:47:08,088 | INFO | Fetching IND season 2024
+2026-03-14 22:47:08,318 | INFO | 82 games collected
+2026-03-14 22:47:08,326 | INFO | 82 games collected
+2026-03-14 22:47:12,319 | INFO | [43/90] Processing LAC 2024
+2026-03-14 22:47:12,319 | INFO | Fetching LAC season 2024
+2026-03-14 22:47:12,326 | INFO | [43/90] Processing LAC 2024
+2026-03-14 22:47:12,326 | INFO | Fetching LAC season 2024
+2026-03-14 22:47:13,111 | INFO | 82 games collected
+2026-03-14 22:47:13,120 | INFO | 82 games collected
+2026-03-14 22:47:17,112 | INFO | [44/90] Processing LAL 2024
+2026-03-14 22:47:17,112 | INFO | Fetching LAL season 2024
+2026-03-14 22:47:17,120 | INFO | [44/90] Processing LAL 2024
+2026-03-14 22:47:17,120 | INFO | Fetching LAL season 2024
+2026-03-14 22:47:17,321 | INFO | 82 games collected
+2026-03-14 22:47:17,321 | INFO | 82 games collected
+2026-03-14 22:47:21,322 | INFO | [45/90] Processing MEM 2024
+2026-03-14 22:47:21,322 | INFO | Fetching MEM season 2024
+2026-03-14 22:47:21,322 | INFO | Fetching MEM season 2024
+2026-03-14 22:47:21,511 | INFO | 82 games collected
+2026-03-14 22:47:21,522 | INFO | 82 games collected
+2026-03-14 22:47:25,511 | INFO | [46/90] Processing MIA 2024
+2026-03-14 22:47:25,511 | INFO | Fetching MIA season 2024
+2026-03-14 22:47:25,522 | INFO | [46/90] Processing MIA 2024
+2026-03-14 22:47:25,522 | INFO | Fetching MIA season 2024
+2026-03-14 22:47:26,346 | INFO | 82 games collected
+2026-03-14 22:47:26,360 | INFO | 82 games collected
+2026-03-14 22:47:30,346 | INFO | [47/90] Processing MIL 2024
+2026-03-14 22:47:30,346 | INFO | Fetching MIL season 2024
+2026-03-14 22:47:30,360 | INFO | [47/90] Processing MIL 2024
+2026-03-14 22:47:30,360 | INFO | Fetching MIL season 2024
+2026-03-14 22:47:30,616 | INFO | 82 games collected
+2026-03-14 22:47:30,628 | INFO | 82 games collected
+2026-03-14 22:47:34,617 | INFO | [48/90] Processing MIN 2024
+2026-03-14 22:47:34,617 | INFO | Fetching MIN season 2024
+2026-03-14 22:47:34,629 | INFO | [48/90] Processing MIN 2024
+2026-03-14 22:47:34,629 | INFO | Fetching MIN season 2024
+2026-03-14 22:47:34,818 | INFO | 82 games collected
+2026-03-14 22:47:34,833 | INFO | 82 games collected
+2026-03-14 22:47:38,819 | INFO | [49/90] Processing NOP 2024
+2026-03-14 22:47:38,819 | INFO | Fetching NOP season 2024
+2026-03-14 22:47:38,833 | INFO | [49/90] Processing NOP 2024
+2026-03-14 22:47:38,835 | INFO | Fetching NOP season 2024
+2026-03-14 22:47:39,129 | INFO | 82 games collected
+2026-03-14 22:47:39,130 | INFO | 82 games collected
+2026-03-14 22:47:43,129 | INFO | [50/90] Processing NYK 2024
+2026-03-14 22:47:43,129 | INFO | Fetching NYK season 2024
+2026-03-14 22:47:43,130 | INFO | [50/90] Processing NYK 2024
+2026-03-14 22:47:43,130 | INFO | Fetching NYK season 2024
+2026-03-14 22:47:43,365 | INFO | 82 games collected
+2026-03-14 22:47:43,373 | INFO | 82 games collected
+2026-03-14 22:47:47,366 | INFO | [51/90] Processing OKC 2024
+2026-03-14 22:47:47,366 | INFO | Fetching OKC season 2024
+2026-03-14 22:47:47,374 | INFO | [51/90] Processing OKC 2024
+2026-03-14 22:47:47,374 | INFO | Fetching OKC season 2024
+2026-03-14 22:47:47,599 | INFO | 82 games collected
+2026-03-14 22:47:47,608 | INFO | 82 games collected
+2026-03-14 22:47:51,600 | INFO | [52/90] Processing ORL 2024
+2026-03-14 22:47:51,600 | INFO | Fetching ORL season 2024
+2026-03-14 22:47:51,608 | INFO | [52/90] Processing ORL 2024
+2026-03-14 22:47:51,608 | INFO | Fetching ORL season 2024
+2026-03-14 22:47:51,796 | INFO | 82 games collected
+2026-03-14 22:47:51,802 | INFO | 82 games collected
+2026-03-14 22:47:55,797 | INFO | [53/90] Processing PHI 2024
+2026-03-14 22:47:55,797 | INFO | Fetching PHI season 2024
+2026-03-14 22:47:55,803 | INFO | [53/90] Processing PHI 2024
+2026-03-14 22:47:55,803 | INFO | Fetching PHI season 2024
+2026-03-14 22:47:56,038 | INFO | 82 games collected
+2026-03-14 22:47:56,047 | INFO | 82 games collected
+2026-03-14 22:48:00,039 | INFO | [54/90] Processing PHO 2024
+2026-03-14 22:48:00,039 | INFO | Fetching PHO season 2024
+2026-03-14 22:48:00,047 | INFO | [54/90] Processing PHO 2024
+2026-03-14 22:48:00,047 | INFO | Fetching PHO season 2024
+2026-03-14 22:48:00,255 | INFO | 82 games collected
+2026-03-14 22:48:00,268 | INFO | 82 games collected
+2026-03-14 22:48:04,255 | INFO | [55/90] Processing POR 2024
+2026-03-14 22:48:04,255 | INFO | Fetching POR season 2024
+2026-03-14 22:48:04,268 | INFO | [55/90] Processing POR 2024
+2026-03-14 22:48:04,268 | INFO | Fetching POR season 2024
+2026-03-14 22:48:04,456 | INFO | 82 games collected
+2026-03-14 22:48:04,468 | INFO | 82 games collected
+2026-03-14 22:48:08,457 | INFO | [56/90] Processing SAC 2024
+2026-03-14 22:48:08,457 | INFO | Fetching SAC season 2024
+2026-03-14 22:48:08,469 | INFO | [56/90] Processing SAC 2024
+2026-03-14 22:48:08,469 | INFO | Fetching SAC season 2024
+2026-03-14 22:48:08,728 | INFO | 82 games collected
+2026-03-14 22:48:08,730 | INFO | 82 games collected
+2026-03-14 22:48:12,729 | INFO | [57/90] Processing SAS 2024
+2026-03-14 22:48:12,729 | INFO | Fetching SAS season 2024
+2026-03-14 22:48:12,730 | INFO | [57/90] Processing SAS 2024
+2026-03-14 22:48:12,730 | INFO | Fetching SAS season 2024
+2026-03-14 22:48:12,932 | INFO | 82 games collected
+2026-03-14 22:48:12,948 | INFO | 82 games collected
+2026-03-14 22:48:16,933 | INFO | [58/90] Processing TOR 2024
+2026-03-14 22:48:16,933 | INFO | Fetching TOR season 2024
+2026-03-14 22:48:16,948 | INFO | [58/90] Processing TOR 2024
+2026-03-14 22:48:16,949 | INFO | Fetching TOR season 2024
+2026-03-14 22:48:17,545 | INFO | 82 games collected
+2026-03-14 22:48:17,548 | INFO | 82 games collected
+2026-03-14 22:48:21,545 | INFO | [59/90] Processing UTA 2024
+2026-03-14 22:48:21,545 | INFO | Fetching UTA season 2024
+2026-03-14 22:48:21,549 | INFO | [59/90] Processing UTA 2024
+2026-03-14 22:48:21,549 | INFO | Fetching UTA season 2024
+2026-03-14 22:48:22,217 | INFO | 82 games collected
+2026-03-14 22:48:22,217 | INFO | 82 games collected
+2026-03-14 22:48:26,218 | INFO | [60/90] Processing WAS 2024
+2026-03-14 22:48:26,218 | INFO | Fetching WAS season 2024
+2026-03-14 22:48:26,439 | INFO | 82 games collected
+2026-03-14 22:48:26,444 | INFO | 82 games collected
+2026-03-14 22:48:30,440 | INFO | [61/90] Processing ATL 2025
+2026-03-14 22:48:30,440 | INFO | Fetching ATL season 2025
+2026-03-14 22:48:30,445 | INFO | [61/90] Processing ATL 2025
+2026-03-14 22:48:30,445 | INFO | Fetching ATL season 2025
+2026-03-14 22:48:30,659 | INFO | 82 games collected
+2026-03-14 22:48:30,664 | INFO | 82 games collected
+2026-03-14 22:48:34,660 | INFO | [62/90] Processing BOS 2025
+2026-03-14 22:48:34,660 | INFO | Fetching BOS season 2025
+2026-03-14 22:48:34,664 | INFO | [62/90] Processing BOS 2025
+2026-03-14 22:48:34,664 | INFO | Fetching BOS season 2025
+2026-03-14 22:48:34,885 | INFO | 82 games collected
+2026-03-14 22:48:34,894 | INFO | 82 games collected
+2026-03-14 22:48:38,885 | INFO | [63/90] Processing BRK 2025
+2026-03-14 22:48:38,885 | INFO | Fetching BRK season 2025
+2026-03-14 22:48:38,895 | INFO | [63/90] Processing BRK 2025
+2026-03-14 22:48:38,895 | INFO | Fetching BRK season 2025
+2026-03-14 22:48:39,135 | INFO | 82 games collected
+2026-03-14 22:48:39,137 | INFO | 82 games collected
+2026-03-14 22:48:43,135 | INFO | [64/90] Processing CHO 2025
+2026-03-14 22:48:43,135 | INFO | Fetching CHO season 2025
+2026-03-14 22:48:43,137 | INFO | [64/90] Processing CHO 2025
+2026-03-14 22:48:43,137 | INFO | Fetching CHO season 2025
+2026-03-14 22:48:43,329 | INFO | 82 games collected
+2026-03-14 22:48:43,332 | INFO | 82 games collected
+2026-03-14 22:48:47,329 | INFO | [65/90] Processing CHI 2025
+2026-03-14 22:48:47,329 | INFO | Fetching CHI season 2025
+2026-03-14 22:48:47,332 | INFO | [65/90] Processing CHI 2025
+2026-03-14 22:48:47,332 | INFO | Fetching CHI season 2025
+2026-03-14 22:48:47,611 | INFO | 82 games collected
+2026-03-14 22:48:47,613 | INFO | 82 games collected
+2026-03-14 22:48:51,611 | INFO | [66/90] Processing CLE 2025
+2026-03-14 22:48:51,611 | INFO | Fetching CLE season 2025
+2026-03-14 22:48:51,613 | INFO | [66/90] Processing CLE 2025
+2026-03-14 22:48:51,613 | INFO | Fetching CLE season 2025
+2026-03-14 22:48:51,850 | INFO | 82 games collected
+2026-03-14 22:48:51,859 | INFO | 82 games collected
+2026-03-14 22:48:55,851 | INFO | [67/90] Processing DAL 2025
+2026-03-14 22:48:55,851 | INFO | Fetching DAL season 2025
+2026-03-14 22:48:55,859 | INFO | [67/90] Processing DAL 2025
+2026-03-14 22:48:55,859 | INFO | Fetching DAL season 2025
+2026-03-14 22:48:56,051 | INFO | 82 games collected
+2026-03-14 22:48:56,063 | INFO | 82 games collected
+2026-03-14 22:49:00,052 | INFO | [68/90] Processing DEN 2025
+2026-03-14 22:49:00,052 | INFO | Fetching DEN season 2025
+2026-03-14 22:49:00,064 | INFO | [68/90] Processing DEN 2025
+2026-03-14 22:49:00,064 | INFO | Fetching DEN season 2025
+2026-03-14 22:49:00,354 | INFO | 82 games collected
+2026-03-14 22:49:00,366 | INFO | 82 games collected
+2026-03-14 22:49:04,355 | INFO | [69/90] Processing DET 2025
+2026-03-14 22:49:04,355 | INFO | Fetching DET season 2025
+2026-03-14 22:49:04,366 | INFO | [69/90] Processing DET 2025
+2026-03-14 22:49:04,367 | INFO | Fetching DET season 2025
+2026-03-14 22:49:04,598 | INFO | 82 games collected
+2026-03-14 22:49:04,602 | INFO | 82 games collected
+2026-03-14 22:49:08,599 | INFO | [70/90] Processing GSW 2025
+2026-03-14 22:49:08,599 | INFO | Fetching GSW season 2025
+2026-03-14 22:49:08,603 | INFO | [70/90] Processing GSW 2025
+2026-03-14 22:49:08,603 | INFO | Fetching GSW season 2025
+2026-03-14 22:49:09,461 | INFO | 82 games collected
+2026-03-14 22:49:09,465 | INFO | 82 games collected
+2026-03-14 22:49:13,462 | INFO | [71/90] Processing HOU 2025
+2026-03-14 22:49:13,462 | INFO | Fetching HOU season 2025
+2026-03-14 22:49:13,465 | INFO | [71/90] Processing HOU 2025
+2026-03-14 22:49:13,465 | INFO | Fetching HOU season 2025
+2026-03-14 22:49:13,695 | INFO | 82 games collected
+2026-03-14 22:49:13,702 | INFO | 82 games collected
+2026-03-14 22:49:17,696 | INFO | [72/90] Processing IND 2025
+2026-03-14 22:49:17,696 | INFO | Fetching IND season 2025
+2026-03-14 22:49:17,703 | INFO | [72/90] Processing IND 2025
+2026-03-14 22:49:17,703 | INFO | Fetching IND season 2025
+2026-03-14 22:49:18,021 | INFO | 82 games collected
+2026-03-14 22:49:18,029 | INFO | 82 games collected
+2026-03-14 22:49:22,022 | INFO | [73/90] Processing LAC 2025
+2026-03-14 22:49:22,022 | INFO | Fetching LAC season 2025
+2026-03-14 22:49:22,029 | INFO | [73/90] Processing LAC 2025
+2026-03-14 22:49:22,029 | INFO | Fetching LAC season 2025
+2026-03-14 22:49:22,238 | INFO | 82 games collected
+2026-03-14 22:49:22,241 | INFO | 82 games collected
+2026-03-14 22:49:26,239 | INFO | [74/90] Processing LAL 2025
+2026-03-14 22:49:26,239 | INFO | Fetching LAL season 2025
+2026-03-14 22:49:26,242 | INFO | [74/90] Processing LAL 2025
+2026-03-14 22:49:26,242 | INFO | Fetching LAL season 2025
+2026-03-14 22:49:26,492 | INFO | 82 games collected
+2026-03-14 22:49:26,493 | INFO | 82 games collected
+2026-03-14 22:49:30,492 | INFO | [75/90] Processing MEM 2025
+2026-03-14 22:49:30,492 | INFO | Fetching MEM season 2025
+2026-03-14 22:49:30,494 | INFO | [75/90] Processing MEM 2025
+2026-03-14 22:49:30,494 | INFO | Fetching MEM season 2025
+2026-03-14 22:49:30,714 | INFO | 82 games collected
+2026-03-14 22:49:30,727 | INFO | 82 games collected
+2026-03-14 22:49:34,715 | INFO | [76/90] Processing MIA 2025
+2026-03-14 22:49:34,715 | INFO | Fetching MIA season 2025
+2026-03-14 22:49:34,727 | INFO | [76/90] Processing MIA 2025
+2026-03-14 22:49:34,727 | INFO | Fetching MIA season 2025
+2026-03-14 22:49:34,958 | INFO | 82 games collected
+2026-03-14 22:49:34,978 | INFO | 82 games collected
+2026-03-14 22:49:38,958 | INFO | [77/90] Processing MIL 2025
+2026-03-14 22:49:38,959 | INFO | Fetching MIL season 2025
+2026-03-14 22:49:38,978 | INFO | [77/90] Processing MIL 2025
+2026-03-14 22:49:38,978 | INFO | Fetching MIL season 2025
+2026-03-14 22:49:39,173 | INFO | 82 games collected
+2026-03-14 22:49:39,179 | INFO | 82 games collected
+2026-03-14 22:49:43,173 | INFO | [78/90] Processing MIN 2025
+2026-03-14 22:49:43,173 | INFO | Fetching MIN season 2025
+2026-03-14 22:49:43,180 | INFO | [78/90] Processing MIN 2025
+2026-03-14 22:49:43,180 | INFO | Fetching MIN season 2025
+2026-03-14 22:49:43,377 | INFO | 82 games collected
+2026-03-14 22:49:43,385 | INFO | 82 games collected
+2026-03-14 22:49:47,377 | INFO | [79/90] Processing NOP 2025
+2026-03-14 22:49:47,378 | INFO | Fetching NOP season 2025
+2026-03-14 22:49:47,386 | INFO | [79/90] Processing NOP 2025
+2026-03-14 22:49:47,386 | INFO | Fetching NOP season 2025
+2026-03-14 22:49:47,609 | INFO | 82 games collected
+2026-03-14 22:49:47,613 | INFO | 82 games collected
+2026-03-14 22:49:51,610 | INFO | [80/90] Processing NYK 2025
+2026-03-14 22:49:51,610 | INFO | Fetching NYK season 2025
+2026-03-14 22:49:51,613 | INFO | [80/90] Processing NYK 2025
+2026-03-14 22:49:51,613 | INFO | Fetching NYK season 2025
+2026-03-14 22:49:51,842 | INFO | 82 games collected
+2026-03-14 22:49:51,848 | INFO | 82 games collected
+2026-03-14 22:49:55,842 | INFO | [81/90] Processing OKC 2025
+2026-03-14 22:49:55,842 | INFO | Fetching OKC season 2025
+2026-03-14 22:49:55,849 | INFO | [81/90] Processing OKC 2025
+2026-03-14 22:49:55,849 | INFO | Fetching OKC season 2025
+2026-03-14 22:49:56,102 | INFO | 82 games collected
+2026-03-14 22:49:56,177 | INFO | 82 games collected
+2026-03-14 22:50:00,103 | INFO | [82/90] Processing ORL 2025
+2026-03-14 22:50:00,103 | INFO | Fetching ORL season 2025
+2026-03-14 22:50:00,177 | INFO | [82/90] Processing ORL 2025
+2026-03-14 22:50:00,177 | INFO | Fetching ORL season 2025
+2026-03-14 22:50:00,345 | INFO | 82 games collected
+2026-03-14 22:50:00,353 | INFO | 82 games collected
+2026-03-14 22:50:04,346 | INFO | [83/90] Processing PHI 2025
+2026-03-14 22:50:04,346 | INFO | Fetching PHI season 2025
+2026-03-14 22:50:04,353 | INFO | [83/90] Processing PHI 2025
+2026-03-14 22:50:04,353 | INFO | Fetching PHI season 2025
+2026-03-14 22:50:04,575 | INFO | 82 games collected
+2026-03-14 22:50:04,576 | INFO | 82 games collected
+2026-03-14 22:50:08,576 | INFO | [84/90] Processing PHO 2025
+2026-03-14 22:50:08,576 | INFO | Fetching PHO season 2025
+2026-03-14 22:50:08,576 | INFO | [84/90] Processing PHO 2025
+2026-03-14 22:50:08,576 | INFO | Fetching PHO season 2025
+2026-03-14 22:50:08,789 | INFO | 82 games collected
+2026-03-14 22:50:08,797 | INFO | 82 games collected
+2026-03-14 22:50:12,790 | INFO | [85/90] Processing POR 2025
+2026-03-14 22:50:12,790 | INFO | Fetching POR season 2025
+2026-03-14 22:50:12,798 | INFO | [85/90] Processing POR 2025
+2026-03-14 22:50:12,798 | INFO | Fetching POR season 2025
+2026-03-14 22:50:13,012 | INFO | 82 games collected
+2026-03-14 22:50:13,017 | INFO | 82 games collected
+2026-03-14 22:50:17,012 | INFO | [86/90] Processing SAC 2025
+2026-03-14 22:50:17,012 | INFO | Fetching SAC season 2025
+2026-03-14 22:50:17,018 | INFO | [86/90] Processing SAC 2025
+2026-03-14 22:50:17,018 | INFO | Fetching SAC season 2025
+2026-03-14 22:50:17,233 | INFO | 82 games collected
+2026-03-14 22:50:17,238 | INFO | 82 games collected
+2026-03-14 22:50:21,233 | INFO | [87/90] Processing SAS 2025
+2026-03-14 22:50:21,233 | INFO | Fetching SAS season 2025
+2026-03-14 22:50:21,239 | INFO | [87/90] Processing SAS 2025
+2026-03-14 22:50:21,239 | INFO | Fetching SAS season 2025
+2026-03-14 22:50:21,471 | INFO | 82 games collected
+2026-03-14 22:50:21,472 | INFO | 82 games collected
+2026-03-14 22:50:25,472 | INFO | [88/90] Processing TOR 2025
+2026-03-14 22:50:25,472 | INFO | Fetching TOR season 2025
+2026-03-14 22:50:25,472 | INFO | [88/90] Processing TOR 2025
+2026-03-14 22:50:25,472 | INFO | Fetching TOR season 2025
+2026-03-14 22:50:25,690 | INFO | 82 games collected
+2026-03-14 22:50:25,697 | INFO | 82 games collected
+2026-03-14 22:50:29,690 | INFO | [89/90] Processing UTA 2025
+2026-03-14 22:50:29,691 | INFO | Fetching UTA season 2025
+2026-03-14 22:50:29,697 | INFO | [89/90] Processing UTA 2025
+2026-03-14 22:50:29,698 | INFO | Fetching UTA season 2025
+2026-03-14 22:50:29,909 | INFO | 82 games collected
+2026-03-14 22:50:29,922 | INFO | 82 games collected
+2026-03-14 22:50:33,909 | INFO | [90/90] Processing WAS 2025
+2026-03-14 22:50:33,909 | INFO | Fetching WAS season 2025
+2026-03-14 22:50:33,923 | INFO | [90/90] Processing WAS 2025
+2026-03-14 22:50:33,923 | INFO | Fetching WAS season 2025
+2026-03-14 22:50:34,165 | INFO | 82 games collected
+2026-03-14 22:50:34,172 | INFO | 82 games collected
+2026-03-14 22:50:38,222 | INFO | Dataset saved: data/raw/nba_raw.csv
+2026-03-14 22:50:38,222 | INFO | Total rows: 7380
+2026-03-14 22:50:38,227 | INFO | Dataset saved: data/raw/nba_raw.csv
+2026-03-14 22:50:38,227 | INFO | Total rows: 7380

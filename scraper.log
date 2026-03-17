@@ -538,3 +538,21 @@
 2026-03-14 22:50:38,222 | INFO | Total rows: 7380
 2026-03-14 22:50:38,227 | INFO | Dataset saved: data/raw/nba_raw.csv
 2026-03-14 22:50:38,227 | INFO | Total rows: 7380
+2026-03-17 11:33:24,590 | INFO | [1/90] Processing ATL 2023
+2026-03-17 11:33:24,590 | INFO | Fetching ATL season 2023
+2026-03-17 11:33:26,063 | INFO | 82 games collected
+2026-03-17 11:33:30,064 | INFO | [2/90] Processing BOS 2023
+2026-03-17 11:33:30,064 | INFO | Fetching BOS season 2023
+2026-03-17 11:33:31,023 | INFO | 82 games collected
+2026-03-17 11:33:35,024 | INFO | [3/90] Processing BRK 2023
+2026-03-17 11:33:35,024 | INFO | Fetching BRK season 2023
+2026-03-17 11:33:35,864 | INFO | 82 games collected
+2026-03-17 11:33:39,864 | INFO | [4/90] Processing CHO 2023
+2026-03-17 11:33:39,865 | INFO | Fetching CHO season 2023
+2026-03-17 11:33:40,546 | INFO | 82 games collected
+2026-03-17 11:33:44,547 | INFO | [5/90] Processing CHI 2023
+2026-03-17 11:33:44,547 | INFO | Fetching CHI season 2023
+2026-03-17 11:33:45,201 | INFO | 82 games collected
+2026-03-17 11:33:49,202 | INFO | [6/90] Processing CLE 2023
+2026-03-17 11:33:49,202 | INFO | Fetching CLE season 2023
+2026-03-17 11:33:50,047 | INFO | 82 games collected

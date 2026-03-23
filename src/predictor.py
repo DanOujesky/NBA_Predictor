@@ -1,165 +1,127 @@
 import logging
+import os
+from pathlib import Path
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 
 import joblib
 import pandas as pd
-from xgboost import XGBClassifier
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score
+from xgboost import XGBClassifier
 
-
+def get_base_path():
+    if getattr(sys, 'frozen', False):
+        return sys._MEIPASS
+    return os.path.abspath(".")
 
 @dataclass(frozen=True)
-class Config:
-    dataset_path: Path = Path("data/processed/nba_processed.csv")
-    model_path: Path = Path("models/nba_predictor.pkl")
+class PredictorConfig:
+    BASE_PATH = get_base_path()
+
+    dataset_path: Path = Path(BASE_PATH) / "data/processed/nba_processed.csv"
+    model_path: Path = Path(BASE_PATH) / "models/nba_win_predictor.pkl"
+    log_path: Path = Path(BASE_PATH) / "logs/predictor.log"
 
     test_size: float = 0.2
     random_state: int = 42
 
+    features: Tuple[str, ...] = (
+        "Diff_Points",
+        "Diff_FG_pct",
+        "Diff_AST",
+        "Diff_TOV",
+        "Is_Home",
+        "Diff_Form",
+        "Diff_Streak"
+    )
 
+    target: str = "Target"
 
 
 class NBAPredictor:
 
-    def __init__(self, config: Optional[Config] = None):
-        self.config = config or Config()
+    def __init__(self, config: Optional[PredictorConfig] = None):
+        self.config = config or PredictorConfig()
         self._setup_logging()
-        self.logger = logging.getLogger("NBAPredictor")
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.model: Optional[XGBClassifier] = None
 
     def _setup_logging(self):
+        os.makedirs(self.config.log_path.parent, exist_ok=True)
+
         logging.basicConfig(
             level=logging.INFO,
-            format="%(asctime)s | %(levelname)s | %(message)s"
+            format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+            handlers=[
+                logging.FileHandler(self.config.log_path),
+                logging.StreamHandler()
+            ]
         )
 
-  
+    def load_dataset(self):
+        return pd.read_csv(self.config.dataset_path)
 
-    def load_data(self) -> pd.DataFrame:
-        if not self.config.dataset_path.exists():
-            raise FileNotFoundError(f"Dataset not found: {self.config.dataset_path}")
-
-        df = pd.read_csv(self.config.dataset_path)
-        df["Date"] = pd.to_datetime(df["Date"])
-        df = df.sort_values("Date")
-
-        self.logger.info(f"Loaded {len(df)} rows")
-        return df
-
-
-
-    def time_split(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        split_index = int(len(df) * (1 - self.config.test_size))
-
-        train = df.iloc[:split_index]
-        test = df.iloc[split_index:]
-
-        self.logger.info(f"Train size: {len(train)}")
-        self.logger.info(f"Test size: {len(test)}")
-
-        return train, test
-
-  
-
-    def get_features(self, df: pd.DataFrame):
-
-        feature_columns = [
-            "HomeGame",
-            "FG_pct",
-            "ThreeP_pct",
-            "FT_pct",
-            "Total_Rebounds",
-            "AST_TOV_Ratio"
-        ]
-
-      
-        missing = [c for c in feature_columns if c not in df.columns]
-        if missing:
-            raise ValueError(f"Missing columns in dataset: {missing}")
-
-        X = df[feature_columns].fillna(0)
-        y = df["Win"]
-
+    def prepare_data(self, df):
+        X = df[list(self.config.features)]
+        y = df[self.config.target]
         return X, y
 
+    def train_model(self, X, y):
 
-
-    def train(self, X_train, y_train, X_test, y_test):
-
-        self.logger.info("Training model...")
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=self.config.test_size, random_state=42, stratify=y
+        )
 
         self.model = XGBClassifier(
-            n_estimators=400,
+            n_estimators=300,
             max_depth=5,
-            learning_rate=0.05,
+            learning_rate=0.02,
             subsample=0.9,
             colsample_bytree=0.9,
-            eval_metric="logloss",
-            random_state=self.config.random_state
+            eval_metric="logloss"
         )
 
-        self.model.fit(
-            X_train,
-            y_train,
-            eval_set=[(X_test, y_test)],
-            verbose=False
-        )
+        self.model.fit(X_train, y_train)
 
         preds = self.model.predict(X_test)
         probs = self.model.predict_proba(X_test)[:, 1]
 
-        acc = accuracy_score(y_test, preds)
-        auc = roc_auc_score(y_test, probs)
-
-        self.logger.info(f"Accuracy: {acc:.4f}")
-        self.logger.info(f"ROC-AUC: {auc:.4f}")
-
-
+        self.logger.info(f"ACC: {accuracy_score(y_test, preds):.4f}")
+        self.logger.info(f"AUC: {roc_auc_score(y_test, probs):.4f}")
 
     def save_model(self):
-        self.config.model_path.parent.mkdir(parents=True, exist_ok=True)
+        os.makedirs(self.config.model_path.parent, exist_ok=True)
         joblib.dump(self.model, self.config.model_path)
-        self.logger.info(f"Model saved to {self.config.model_path}")
-
 
     def load_model(self):
-        if not self.config.model_path.exists():
-            raise FileNotFoundError("Model not found")
-
         self.model = joblib.load(self.config.model_path)
-        self.logger.info("Model loaded")
 
-
-
-    def predict(self, features: dict) -> float:
+    def predict_win_probability(self, X):
         if self.model is None:
-            raise ValueError("Model not loaded")
+            self.load_model()
+        return float(self.model.predict_proba(X)[0][1])
 
-        df = pd.DataFrame([features])
-        prob = self.model.predict_proba(df)[0][1]
-        return float(prob)
+    def calculate_betting_value(self, prob, odds):
 
+        fair_odds = 1 / prob if prob > 0 else 0
+        ev = (prob * odds) - 1
 
+        return {
+            "win_probability": prob,
+            "fair_odds": fair_odds,
+            "expected_value": ev,
+            "has_value": ev > 0.05
+        }
 
-    def run(self):
-        self.logger.info("Starting training pipeline")
-
-        df = self.load_data()
-
-        train_df, test_df = self.time_split(df)
-
-        X_train, y_train = self.get_features(train_df)
-        X_test, y_test = self.get_features(test_df)
-
-        self.train(X_train, y_train, X_test, y_test)
+    def run_training_pipeline(self):
+        df = self.load_dataset()
+        X, y = self.prepare_data(df)
+        self.train_model(X, y)
         self.save_model()
-
-        self.logger.info("Training completed successfully")
-
 
 
 if __name__ == "__main__":
-    predictor = NBAPredictor()
-    predictor.run()
+    NBAPredictor().run_training_pipeline()

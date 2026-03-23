@@ -1,0 +1,17 @@
+
+.venv/
+venv/
+ENV/
+
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.spec
+
+data/
+models/*.pkl
+logs/*.log
+
+.idea/
+.vscode/

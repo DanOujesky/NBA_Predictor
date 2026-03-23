@@ -31,7 +31,7 @@ class NBAScraper:
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s | %(levelname)s | %(message)s",
-            filename="scraper.log"
+            filename="logs/scraper.log"
         )
 
         self.logger = logging.getLogger("NBA_SCRAPER")

@@ -1,5 +1,5 @@
-
 import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
@@ -10,35 +10,22 @@ import pandas as pd
 
 @dataclass(frozen=True)
 class ProcessorConfig:
-    """
-    Configuration for the NBA ETL pipeline.
-    """
-
     raw_path: Path = Path("data/raw/nba_raw.csv")
-    output_path: Path = Path("data/processed/nba_processed.csv")
-    log_path: Path = Path("processor.log")
+    processed_path: Path = Path("data/processed/nba_processed.csv")
+    log_path: Path = Path("logs/processor.log")
+    rolling_window: int = 10
+    form_window: int = 5
 
 
 class NBADataProcessor:
-    """
-    Production-grade ETL pipeline for NBA game statistics.
-
-    Responsibilities:
-    - Load raw dataset
-    - Clean malformed rows
-    - Normalize column schema
-    - Create analytical features
-    - Validate dataset integrity
-    - Export processed dataset
-    """
 
     def __init__(self, config: Optional[ProcessorConfig] = None):
-
         self.config = config or ProcessorConfig()
         self._setup_logging()
         self.logger = logging.getLogger(self.__class__.__name__)
 
-    def _setup_logging(self) -> None:
+    def _setup_logging(self):
+        os.makedirs(self.config.log_path.parent, exist_ok=True)
 
         logging.basicConfig(
             level=logging.INFO,
@@ -49,233 +36,228 @@ class NBADataProcessor:
             ]
         )
 
-
-
     def load_raw_data(self) -> pd.DataFrame:
-
         if not self.config.raw_path.exists():
-
-            raise FileNotFoundError(
-                f"Raw dataset not found at {self.config.raw_path}"
-            )
+            raise FileNotFoundError(f"Missing raw dataset: {self.config.raw_path}")
 
         df = pd.read_csv(self.config.raw_path)
 
-        self.logger.info(f"Loaded dataset with {len(df)} rows")
-
+        self.logger.info(f"Loaded raw dataset: {len(df)} rows")
         return df
 
+    def clean_and_normalize(self, df: pd.DataFrame) -> pd.DataFrame:
+        self.logger.info("Cleaning & normalizing data...")
 
+        df = df.copy().drop_duplicates()
 
-    def clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
-
-        self.logger.info("Starting data cleaning stage")
-
-        df = df.copy()
-
-      
-        before = len(df)
-        df = df.drop_duplicates()
-        self.logger.info(f"Removed {before - len(df)} duplicate rows")
-
-       
         rename_map = {
             "Tm": "Team_Points",
             "Opp.1": "Opponent_Points",
-
-            "FG": "Team_FG",
-            "FGA": "Team_FGA",
             "FG%": "Team_FG_pct",
-            "3P": "Team_3P",
-            "3PA": "Team_3PA",
-            "3P%": "Team_3P_pct",
-            "FT": "Team_FT",
-            "FTA": "Team_FTA",
-            "FT%": "Team_FT_pct",
-            "ORB": "Team_ORB",
-            "DRB": "Team_DRB",
-            "TRB": "Team_TRB",
             "AST": "Team_AST",
-            "STL": "Team_STL",
-            "BLK": "Team_BLK",
             "TOV": "Team_TOV",
-            "PF": "Team_PF",
-
-            "FG.1": "Opp_FG",
-            "FGA.1": "Opp_FGA",
-            "FG%.1": "Opp_FG_pct",
-            "3P.1": "Opp_3P",
-            "3PA.1": "Opp_3PA",
-            "3P%.1": "Opp_3P_pct",
-            "FT.1": "Opp_FT",
-            "FTA.1": "Opp_FTA",
-            "FT%.1": "Opp_FT_pct",
-            "ORB.1": "Opp_ORB",
-            "DRB.1": "Opp_DRB",
-            "TRB.1": "Opp_TRB",
-            "AST.1": "Opp_AST",
-            "STL.1": "Opp_STL",
-            "BLK.1": "Opp_BLK",
-            "TOV.1": "Opp_TOV",
-            "PF.1": "Opp_PF",
+            "Opp": "Opponent_Code"
         }
 
         df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
 
-        self.logger.info("Column normalization completed")
+        required = ["Date", "Team", "Opponent_Code", "Team_Points", "Opponent_Points"]
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            raise ValueError(f"Missing required columns: {missing}")
 
-    
-        numeric_columns = [
-            "Team_Points",
-            "Opponent_Points",
-            "Team_FG",
-            "Team_FGA",
-            "Team_3P",
-            "Team_3PA",
-            "Team_FT",
-            "Team_FTA",
-            "Team_ORB",
-            "Team_DRB",
-            "Team_TRB",
-            "Team_AST",
-            "Team_STL",
-            "Team_BLK",
-            "Team_TOV",
-            "Team_PF",
-        ]
+        df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
 
-        for col in numeric_columns:
-
+        numeric_cols = ["Team_Points", "Opponent_Points", "Team_FG_pct", "Team_AST", "Team_TOV"]
+        for col in numeric_cols:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        self.logger.info("Numeric conversion complete")
-
-        
-        before = len(df)
-        df = df.dropna(subset=["Team_Points", "Opponent_Points"])
-        removed = before - len(df)
-
-        self.logger.info(f"Removed {removed} rows missing score data")
-
-       
-        if "Unnamed: 3_level_1" in df.columns:
-
-            df["HomeGame"] = (df["Unnamed: 3_level_1"] != "@").astype(int)
-
+        ha_col = "Unnamed: 3_level_1"
+        if ha_col in df.columns:
+            df["Is_Home"] = (df[ha_col] != "@").fillna(True).astype(int)
         else:
+            df["Is_Home"] = 1
+            self.logger.warning("Home/Away column missing — defaulting to home")
 
-            df["HomeGame"] = np.nan
-            self.logger.warning("Home/Away column missing")
+        before = len(df)
+        df = df.dropna(subset=["Team_Points", "Opponent_Points", "Date"])
+        self.logger.info(f"Dropped {before - len(df)} invalid rows")
 
-        if df.empty:
-
-            raise ValueError("Cleaning resulted in empty dataset")
-
-        self.logger.info(f"Cleaning finished. Remaining rows: {len(df)}")
+        df = df.sort_values(["Team", "Date"]).reset_index(drop=True)
 
         return df
 
-  
+    def add_target(self, df: pd.DataFrame) -> pd.DataFrame:
+        df["Target"] = (df["Team_Points"] > df["Opponent_Points"]).astype(int)
+        return df
+
+    def rolling_stats(self, df: pd.DataFrame) -> pd.DataFrame:
+        self.logger.info("Calculating rolling stats...")
+
+        stats = ["Team_Points", "Team_FG_pct", "Team_AST", "Team_TOV"]
+
+        rolling = (
+            df.groupby("Team")[stats]
+            .rolling(self.config.rolling_window, min_periods=3)
+            .mean()
+            .shift(1)
+            .reset_index(level=0, drop=True)
+        )
+
+        rolling.columns = [f"Roll_{c}" for c in rolling.columns]
+
+        before = len(df)
+        df = pd.concat([df, rolling], axis=1)
+        df = df.dropna(subset=rolling.columns)
+
+        self.logger.info(f"Rolling stats reduced rows: {before} → {len(df)}")
+
+        return df
+
+    def form_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        self.logger.info("Calculating form & streak...")
+
+        df["Form"] = (
+            df.groupby("Team")["Target"]
+            .rolling(self.config.form_window, min_periods=3)
+            .mean()
+            .shift(1)
+            .reset_index(level=0, drop=True)
+        )
+
+        def streak(series):
+            result = []
+            count = 0
+            last = None
+
+            for val in series:
+                if val == last:
+                    count += 1
+                else:
+                    count = 1
+                result.append(count if val == 1 else -count)
+                last = val
+
+            return pd.Series(result, index=series.index)
+
+        df["Streak"] = df.groupby("Team")["Target"].transform(streak).shift(1)
+
+        before = len(df)
+        df = df.dropna(subset=["Form", "Streak"])
+        self.logger.info(f"Form features reduced rows: {before} → {len(df)}")
+
+        return df
+
+    def merge_opponent(self, df: pd.DataFrame) -> pd.DataFrame:
+        self.logger.info("Merging opponent features...")
+
+        cols = [
+            "Date", "Team",
+            "Roll_Team_Points", "Roll_Team_FG_pct",
+            "Roll_Team_AST", "Roll_Team_TOV",
+            "Form", "Streak"
+        ]
+
+        opp = df[cols].copy()
+        opp.columns = ["Date", "Opponent_Code"] + [f"Opp_{c}" for c in cols[2:]]
+
+        merged = df.merge(
+            opp,
+            on=["Date", "Opponent_Code"],
+            how="inner",
+            validate="many_to_one"
+        )
+
+        self.logger.info(f"Merged dataset size: {len(merged)}")
+
+        return merged
 
     def create_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        self.logger.info("Creating differential features...")
 
-        self.logger.info("Starting feature engineering")
+        df["Diff_Points"] = df["Roll_Team_Points"] - df["Opp_Roll_Team_Points"]
+        df["Diff_FG_pct"] = df["Roll_Team_FG_pct"] - df["Opp_Roll_Team_FG_pct"]
+        df["Diff_AST"] = df["Roll_Team_AST"] - df["Opp_Roll_Team_AST"]
+        df["Diff_TOV"] = df["Roll_Team_TOV"] - df["Opp_Roll_Team_TOV"]
 
-        df = df.copy()
+        df["Diff_Form"] = df["Form"] - df["Opp_Form"]
+        df["Diff_Streak"] = df["Streak"] - df["Opp_Streak"]
 
-       
-        df["ScoreDiff"] = df["Team_Points"] - df["Opponent_Points"]
+        dup_cols = [col for col in df.columns if col.endswith(".1")]
+        df = df.drop(columns=dup_cols, errors="ignore")
 
-      
-        df["Win"] = (df["ScoreDiff"] > 0).astype(int)
-
-        if "Team_FG" in df.columns and "Team_FGA" in df.columns:
-
-            df["FG_pct"] = (df["Team_FG"] / df["Team_FGA"]).replace(
-                [np.inf, -np.inf], np.nan
-            )
-
-        if "Team_3P" in df.columns and "Team_3PA" in df.columns:
-
-            df["ThreeP_pct"] = (df["Team_3P"] / df["Team_3PA"]).replace(
-                [np.inf, -np.inf], np.nan
-            )
-
-        if "Team_FT" in df.columns and "Team_FTA" in df.columns:
-
-            df["FT_pct"] = (df["Team_FT"] / df["Team_FTA"]).replace(
-                [np.inf, -np.inf], np.nan
-            )
-
-      
-        if "Team_ORB" in df.columns and "Team_DRB" in df.columns:
-
-            df["Total_Rebounds"] = df["Team_ORB"] + df["Team_DRB"]
-
-        if "Team_AST" in df.columns and "Team_TOV" in df.columns:
-
-            df["AST_TOV_Ratio"] = df["Team_AST"] / (df["Team_TOV"] + 1)
-
-        self.logger.info("Feature engineering complete")
+        df = df.drop(columns=["Unnamed: 3_level_1"], errors="ignore")
 
         return df
 
-
-    def validate_dataset(self, df: pd.DataFrame) -> None:
-
+    def validate_dataset(self, df: pd.DataFrame):
         if df.empty:
+            raise ValueError("Final dataset is empty")
 
-            raise ValueError("Processed dataset is empty")
-
-        required_columns = ["Win", "ScoreDiff"]
-
-        missing = [c for c in required_columns if c not in df.columns]
-
-        if missing:
-
-            raise ValueError(f"Dataset validation failed. Missing: {missing}")
+        if df.isna().sum().sum() > 0:
+            self.logger.warning("Dataset still contains NaNs")
 
         self.logger.info("Dataset validation passed")
 
+    def run_pipeline(self) -> pd.DataFrame:
+        self.logger.info("Pipeline started")
 
-    def save_processed_data(self, df: pd.DataFrame) -> None:
+        df = self.load_raw_data()
+        df = self.clean_and_normalize(df)
+        df = self.add_target(df)
+        df = self.rolling_stats(df)
+        df = self.form_features(df)
+        df = self.merge_opponent(df)
+        df = self.create_features(df)
 
-        self.config.output_path.parent.mkdir(parents=True, exist_ok=True)
+        before = len(df)
 
-        df.to_csv(self.config.output_path, index=False)
+        important_cols = [
+            "Roll_Team_Points",
+            "Opp_Roll_Team_Points",
+            "Form",
+            "Opp_Form"
+        ]
 
-        self.logger.info(f"Saved processed dataset to {self.config.output_path}")
+        df = df.dropna(subset=important_cols)
 
+        self.logger.info(f"Final clean dataset: {before} → {len(df)} rows")
 
-    def run_pipeline(self) -> None:
+        df = df.replace([np.inf, -np.inf], np.nan)
 
-        try:
+        nan_count = df.isna().sum().sum()
+        if nan_count > 0:
+            self.logger.warning(f"Dropping NaNs: {nan_count} values")
 
-            self.logger.info("Pipeline execution started")
+        model_cols = [
+            "Diff_Points",
+            "Diff_FG_pct",
+            "Diff_AST",
+            "Diff_TOV",
+            "Is_Home",
+            "Diff_Form",
+            "Diff_Streak",
+            "Target"
+        ]
 
-            raw_df = self.load_raw_data()
+        before = len(df)
 
-            cleaned_df = self.clean_data(raw_df)
+        df = df.dropna(subset=model_cols).reset_index(drop=True)
 
-            enriched_df = self.create_features(cleaned_df)
+        self.logger.info(f"Final model dataset: {before} → {len(df)} rows")
 
-            self.validate_dataset(enriched_df)
+        if df.empty:
+            raise ValueError("Final dataset is empty after cleaning")
 
-            self.save_processed_data(enriched_df)
+        self.logger.info("Dataset validation passed")
 
-            self.logger.info("Pipeline execution finished successfully")
+        os.makedirs(self.config.processed_path.parent, exist_ok=True)
+        df.to_csv(self.config.processed_path, index=False)
 
-        except Exception as e:
+        self.logger.info(f"Pipeline finished: {len(df)} rows saved")
 
-            self.logger.critical("Pipeline failed", exc_info=True)
-
-            raise
-
+        return df
 
 if __name__ == "__main__":
-
-    processor = NBADataProcessor()
-
-    processor.run_pipeline()
-
+    NBADataProcessor().run_pipeline()

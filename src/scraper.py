@@ -5,6 +5,8 @@ import os
 import logging
 from io import StringIO
 from requests.exceptions import RequestException
+from datetime import datetime
+
 
 
 class NBAScraper:
@@ -156,6 +158,7 @@ if __name__ == "__main__":
         "OKC", "ORL", "PHI", "PHO", "POR", "SAC", "SAS", "TOR", "UTA", "WAS"
     ]
 
-    target_years = [2023, 2024, 2025]
+    current_year = datetime.now().year
+    target_years = list(range(2023, current_year))
 
     scraper.run_bulk_collection(target_teams, target_years)

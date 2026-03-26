@@ -9,7 +9,6 @@ build/
 dist/
 *.spec
 
-models/*.pkl
 logs/*.log
 
 .idea/

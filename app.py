@@ -17,7 +17,7 @@ FUTURE_GAMES_PATH = Path("data/raw/future_games.csv")
 PROCESSED_DATA_PATH = Path("data/processed/nba_processed.csv")
 SCALER_PATH = Path("models/scaler.pkl")
 
-st.set_page_config(page_title="NBA Edge Predictor Pro", page_icon="🏀", layout="wide")
+st.set_page_config(page_title="NBA Predictor", page_icon="🏀", layout="wide")
 
 class NBAAppManager:
     def __init__(self):

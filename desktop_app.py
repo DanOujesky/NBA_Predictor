@@ -4,24 +4,37 @@ import subprocess
 import time
 import sys
 import os
+from pathlib import Path
 
 PORT = 8501
 URL = f"http://127.0.0.1:{PORT}"
 
 def start_streamlit():
-    subprocess.Popen(
-        [sys.executable, "-m", "streamlit", "run", "app.py", 
-         "--server.port", str(PORT), 
-         "--server.headless", "true", 
-         "--global.developmentMode", "false"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    base_path = Path(__file__).parent
+    app_path = base_path / "app.py"
+    
+    cmd = [
+        sys.executable, "-m", "streamlit", "run", str(app_path),
+        "--server.port", str(PORT),
+        "--server.headless", "true",
+        "--global.developmentMode", "false"
+    ]
+    
+    return subprocess.Popen(cmd)
 
 if __name__ == "__main__":
-    threading.Thread(target=start_streamlit, daemon=True).start()
+    proc = start_streamlit()
 
     time.sleep(5)
 
-    webview.create_window("NBA Edge Predictor Pro", URL, width=1200, height=800)
-    webview.start()
+    try:
+        window = webview.create_window(
+            "🏀 NBA Predictor", 
+            URL, 
+            width=1300, 
+            height=900,
+            resizable=True
+        )
+        webview.start()
+    finally:
+        proc.kill()

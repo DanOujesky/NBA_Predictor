@@ -56,61 +56,58 @@ class NBADataProcessor:
 
         rename_map = {
             "Tm": "Team_Points",
-            "Opp.1": "Opponent_Points",
+            "Opp_1": "Opponent_Points",
             "FG%": "Team_FG_pct",
             "AST": "Team_AST",
             "TOV": "Team_TOV",
             "Opp": "Opponent_Code"
         }
-        df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
+        df = df.rename(columns=rename_map)
 
-        # CRITICAL FIX: Normalize strings to ensure "LAL" matches "LAL"
         df["Team"] = df["Team"].astype(str).str.strip()
         df["Opponent_Code"] = df["Opponent_Code"].astype(str).str.strip()
-
         df["Date"] = pd.to_datetime(df["Date"])
-        numeric_cols = ["Team_Points", "Opponent_Points", "Team_FG_pct", "Team_AST", "Team_TOV"]
 
+        numeric_cols = ["Team_Points", "Opponent_Points", "Team_FG_pct", "Team_AST", "Team_TOV"]
         for col in numeric_cols:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        ha_col = "Unnamed: 3_level_1"
-        df["Is_Home"] = (df[ha_col] != "@").astype(int) if ha_col in df.columns else 1
+        if "HomeAway" in df.columns:
+            df["Is_Home"] = np.where(df["HomeAway"] == "@", 0, 1)
+        else:
+            df["Is_Home"] = 1
 
         df = df.dropna(subset=["Team_Points", "Date", "Team", "Opponent_Code"])
-        self.logger.info(f"Cleaned data: {len(df)} rows remaining.")
         return df.sort_values(["Team", "Date"])
 
     def engineer_features(self, df: pd.DataFrame) -> pd.DataFrame:
         self.logger.info("Phase 2: Feature engineering (rolling statistics)...")
-        df["Target"] = (df["Team_Points"] > df["Opponent_Points"]).astype(int)
-
+        
+        df["Target"] = (df["Team_Points"] > df["Opponent_Points"]).astype(float)
         stats = ["Team_Points", "Team_FG_pct", "Team_AST", "Team_TOV"]
+        
+        for col in stats:
+            df[f"Roll_{col}"] = df.groupby("Team")[col].transform(
+                lambda x: x.rolling(window=self.config.rolling_window, min_periods=1).mean().shift(1)
+            )
 
-        # Use min_periods=1 so we don't lose the start of the season
-        rolling = df.groupby("Team")[stats].apply(
-            lambda x: x.rolling(window=self.config.rolling_window, min_periods=1).mean().shift(1)
-        ).reset_index(level=0, drop=True)
-        rolling.columns = [f"Roll_{c}" for c in rolling.columns]
-
-        df["Form"] = df.groupby("Team")["Target"].apply(
+        df["Form"] = df.groupby("Team")["Target"].transform(
             lambda x: x.rolling(window=self.config.form_window, min_periods=1).mean().shift(1)
-        ).reset_index(level=0, drop=True)
+        )
 
         def calc_streak(series):
-            streak, results = 0, []
+            streak = 0
+            results = []
             for val in series:
                 results.append(streak)
-                if val == 1: streak = streak + 1 if streak >= 0 else 1
-                else: streak = streak - 1 if streak <= 0 else -1
+                if val == 1:
+                    streak = streak + 1 if streak >= 0 else 1
+                else:
+                    streak = streak - 1 if streak <= 0 else -1
             return pd.Series(results, index=series.index)
 
-        df["Streak"] = df.groupby("Team")["Target"].apply(calc_streak).reset_index(level=0, drop=True)
-
-        df = pd.concat([df, rolling], axis=1)
-        
-        # Drop only the rows that literally have no rolling data (the very first game)
+        df["Streak"] = df.groupby("Team")["Target"].transform(calc_streak)
         return df.dropna(subset=["Roll_Team_Points", "Form"])
 
     def merge_and_diff(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -121,20 +118,15 @@ class NBADataProcessor:
             "Roll_Team_AST", "Roll_Team_TOV", "Form", "Streak"
         ]
 
-        # Prepare a lookup table for opponents
         opp_df = df[["Date", "Team"] + cols_to_compare].copy()
         opp_df.columns = ["Date", "Opponent_Code"] + [f"Opp_{c}" for c in cols_to_compare]
 
-        # Merge based on Date and Opponent
         merged = df.merge(opp_df, on=["Date", "Opponent_Code"], how="inner")
 
         if merged.empty:
-            self.logger.error("MERGE RESULTED IN 0 ROWS! Check if 'Team' and 'Opponent_Code' formats match.")
-            self.logger.info(f"Sample Teams: {df['Team'].unique()[:3]}")
-            self.logger.info(f"Sample Opponents: {df['Opponent_Code'].unique()[:3]}")
+            self.logger.error("MERGE RESULTED IN 0 ROWS! Problém v názvech týmů.")
             raise ValueError("Data mismatch: Team names and Opponent codes do not align.")
 
-        # Vectorized calculation of differences
         merged["Diff_Points"] = merged["Roll_Team_Points"] - merged["Opp_Roll_Team_Points"]
         merged["Diff_FG_pct"] = merged["Roll_Team_FG_pct"] - merged["Opp_Roll_Team_FG_pct"]
         merged["Diff_AST"] = merged["Roll_Team_AST"] - merged["Opp_Roll_Team_AST"]
@@ -142,22 +134,16 @@ class NBADataProcessor:
         merged["Diff_Form"] = merged["Form"] - merged["Opp_Form"]
         merged["Diff_Streak"] = merged["Streak"] - merged["Opp_Streak"]
 
-        self.logger.info(f"Differentials computed. {len(merged)} rows matched.")
         return merged
 
     def apply_scaling(self, df: pd.DataFrame) -> pd.DataFrame:
         self.logger.info("Phase 4: Feature scaling...")
         
-        if df.empty:
-            raise ValueError("DataFrame is empty before scaling phase.")
-
-        # Fit and transform only the feature columns
-        df[self.config.feature_cols] = self.scaler.fit_transform(df[self.config.feature_cols])
+        scaler_data = df[self.config.feature_cols]
+        df[self.config.feature_cols] = self.scaler.fit_transform(scaler_data)
 
         os.makedirs(self.config.scaler_path.parent, exist_ok=True)
         joblib.dump(self.scaler, self.config.scaler_path)
-        self.logger.info(f"Scaler saved to {self.config.scaler_path}")
-
         return df
 
     def run_pipeline(self):
@@ -168,8 +154,18 @@ class NBADataProcessor:
             df = self.merge_and_diff(df)
             df = self.apply_scaling(df)
 
-            final_cols = self.config.feature_cols + ["Is_Home", "Target", "Team", "Opponent_Code", "Date"]
-            df_final = df[final_cols]
+            ui_cols = [
+                "Roll_Team_Points", "Roll_Team_FG_pct", "Roll_Team_AST", 
+                "Roll_Team_TOV", "Form", "Streak"
+            ]
+            
+            meta_cols = ["Is_Home", "Target", "Team", "Opponent_Code", "Date"]
+            
+            final_selection = self.config.feature_cols + meta_cols + ui_cols
+            
+            final_selection = list(dict.fromkeys(final_selection))
+            
+            df_final = df[final_selection]
 
             os.makedirs(self.config.processed_path.parent, exist_ok=True)
             df_final.to_csv(self.config.processed_path, index=False)

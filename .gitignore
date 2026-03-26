@@ -9,7 +9,6 @@ build/
 dist/
 *.spec
 
-data/
 models/*.pkl
 logs/*.log
 

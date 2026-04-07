@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NBA Predictor</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #0a0e17;
+        color: #e0e4ef;
+        min-height: 100vh;
+      }
+      a {
+        color: #6ea8fe;
+        text-decoration: none;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%);
+        padding: 20px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #1e2738;
+      }
+      .header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .header h1 span {
+        color: #f97316;
+      }
+      .header .status {
+        font-size: 13px;
+        color: #8b95a5;
+      }
+      .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+      }
+      .status-dot.active {
+        background: #22c55e;
+      }
+      .status-dot.inactive {
+        background: #ef4444;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 24px;
+        background: #111827;
+        border-radius: 10px;
+        padding: 4px;
+      }
+      .tab {
+        padding: 10px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #8b95a5;
+        transition: all 0.2s;
+      }
+      .tab:hover {
+        color: #e0e4ef;
+      }
+      .tab.active {
+        background: #1e2738;
+        color: #fff;
+      }
+
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: block;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: #111827;
+        border: 1px solid #1e2738;
+        border-radius: 12px;
+        padding: 20px;
+        transition: border-color 0.2s;
+      }
+      .card:hover {
+        border-color: #374151;
+      }
+
+      .game-teams {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .team-block {
+        text-align: center;
+        flex: 1;
+      }
+      .team-abbr {
+        font-size: 28px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .team-name {
+        font-size: 12px;
+        color: #8b95a5;
+        margin-top: 2px;
+      }
+      .vs {
+        font-size: 14px;
+        color: #4b5563;
+        font-weight: 600;
+        padding: 0 12px;
+      }
+
+      .prob-bar {
+        background: #1e2738;
+        border-radius: 6px;
+        height: 32px;
+        display: flex;
+        overflow: hidden;
+        margin: 12px 0;
+      }
+      .prob-fill {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        transition: width 0.5s;
+      }
+      .prob-fill.home {
+        background: linear-gradient(90deg, #2563eb, #3b82f6);
+        color: #fff;
+      }
+      .prob-fill.away {
+        background: linear-gradient(90deg, #dc2626, #ef4444);
+        color: #fff;
+      }
+
+      .game-date {
+        font-size: 12px;
+        color: #6b7280;
+        text-align: center;
+      }
+      .prediction-label {
+        text-align: center;
+        font-size: 13px;
+        color: #f97316;
+        font-weight: 600;
+        margin-top: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        text-align: left;
+        padding: 12px 16px;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: #6b7280;
+        border-bottom: 1px solid #1e2738;
+        font-weight: 600;
+      }
+      td {
+        padding: 12px 16px;
+        font-size: 14px;
+        border-bottom: 1px solid #111827;
+      }
+      tr:hover td {
+        background: #111827;
+      }
+      .highlight {
+        color: #22c55e;
+        font-weight: 600;
+      }
+      .muted {
+        color: #6b7280;
+      }
+
+      .injury-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .injury-tag.out {
+        background: #7f1d1d;
+        color: #fca5a5;
+      }
+      .injury-tag.questionable {
+        background: #78350f;
+        color: #fcd34d;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6b7280;
+      }
+      .empty-state h3 {
+        font-size: 18px;
+        color: #9ca3af;
+        margin-bottom: 8px;
+      }
+      .empty-state p {
+        font-size: 14px;
+      }
+
+      .metric-row {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .metric {
+        background: #111827;
+        border: 1px solid #1e2738;
+        border-radius: 10px;
+        padding: 16px 20px;
+        flex: 1;
+        min-width: 150px;
+      }
+      .metric-value {
+        font-size: 28px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .metric-label {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+      }
+
+      @media (max-width: 640px) {
+        .header {
+          padding: 16px 20px;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .tabs {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1><span>NBA</span> Predictor</h1>
+      <div class="status" id="statusBar">
+        <span class="status-dot inactive"></span>Loading...
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="tabs">
+        <div class="tab active" data-panel="predictions">Predictions</div>
+        <div class="tab" data-panel="models">Model Comparison</div>
+        <div class="tab" data-panel="injuries">Injury Report</div>
+      </div>
+
+      <div id="predictions" class="panel active">
+        <div class="metric-row" id="predMetrics"></div>
+        <div class="grid" id="predGrid"></div>
+        <div class="empty-state" id="predEmpty" style="display: none">
+          <h3>No predictions available</h3>
+          <p>Run the pipeline first: <code>python pipeline.py</code></p>
+        </div>
+      </div>
+
+      <div id="models" class="panel">
+        <div class="metric-row" id="modelMetrics"></div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Accuracy</th>
+                <th>ROC-AUC</th>
+                <th>F1 Score</th>
+                <th>Log Loss</th>
+                <th>CV Mean</th>
+              </tr>
+            </thead>
+            <tbody id="modelTable"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="modelEmpty" style="display: none">
+          <h3>No model results yet</h3>
+          <p>Train models with: <code>python pipeline.py</code></p>
+        </div>
+      </div>
+
+      <div id="injuries" class="panel">
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Team</th>
+                <th>PPG</th>
+                <th>RPG</th>
+                <th>APG</th>
+                <th>Value</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="injuryTable"></tbody>
+          </table>
+        </div>
+        <div class="empty-state" id="injuryEmpty" style="display: none">
+          <h3>No injury data available</h3>
+          <p>Injury data is collected during the pipeline run.</p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => document.querySelectorAll(s);
+
+      $$(".tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          $$(".tab").forEach((t) => t.classList.remove("active"));
+          $$(".panel").forEach((p) => p.classList.remove("active"));
+          tab.classList.add("active");
+          $("#" + tab.dataset.panel).classList.add("active");
+        });
+      });
+
+      async function fetchJSON(url) {
+        try {
+          const r = await fetch(url);
+          return await r.json();
+        } catch {
+          return null;
+        }
+      }
+
+      function renderPredictions(data) {
+        const grid = $("#predGrid");
+        const empty = $("#predEmpty");
+        const metrics = $("#predMetrics");
+        if (!data || !data.predictions || data.predictions.length === 0) {
+          empty.style.display = "block";
+          return;
+        }
+
+        metrics.innerHTML = `
+                <div class="metric"><div class="metric-value">${data.predictions.length}</div><div class="metric-label">Games Predicted</div></div>
+                <div class="metric"><div class="metric-value">${data.model_name}</div><div class="metric-label">Active Model</div></div>
+            `;
+
+        grid.innerHTML = data.predictions
+          .map((g) => {
+            const hp = Math.round((g.home_prob || 0.5) * 100);
+            const ap = 100 - hp;
+            const winner = hp >= 50 ? g.home_team : g.away_team;
+            return `
+                <div class="card">
+                    <div class="game-date">${g.date || ""}</div>
+                    <div class="game-teams">
+                        <div class="team-block"><div class="team-abbr">${g.away_team || "?"}</div><div class="team-name">Away</div></div>
+                        <div class="vs">VS</div>
+                        <div class="team-block"><div class="team-abbr">${g.home_team || "?"}</div><div class="team-name">Home</div></div>
+                    </div>
+                    <div class="prob-bar">
+                        <div class="prob-fill away" style="width:${ap}%">${ap}%</div>
+                        <div class="prob-fill home" style="width:${hp}%">${hp}%</div>
+                    </div>
+                    <div class="prediction-label">Predicted Winner: ${winner}</div>
+                </div>`;
+          })
+          .join("");
+      }
+
+      function renderModels(data) {
+        const table = $("#modelTable");
+        const empty = $("#modelEmpty");
+        const metrics = $("#modelMetrics");
+        if (!data || !data.models || data.models.length === 0) {
+          empty.style.display = "block";
+          return;
+        }
+
+        const best = data.models.reduce((a, b) =>
+          (a["ROC-AUC"] || 0) > (b["ROC-AUC"] || 0) ? a : b,
+        );
+        metrics.innerHTML = `
+                <div class="metric"><div class="metric-value">${data.models.length}</div><div class="metric-label">Models Trained</div></div>
+                <div class="metric"><div class="metric-value">${best.Model}</div><div class="metric-label">Best Model</div></div>
+                <div class="metric"><div class="metric-value">${((best.Accuracy || 0) * 100).toFixed(1)}%</div><div class="metric-label">Best Accuracy</div></div>
+                <div class="metric"><div class="metric-value">${(best["ROC-AUC"] || 0).toFixed(4)}</div><div class="metric-label">Best AUC</div></div>
+            `;
+
+        table.innerHTML = data.models
+          .map(
+            (m) => `
+                <tr>
+                    <td><strong>${m.Model}</strong></td>
+                    <td class="${m.Model === best.Model ? "highlight" : ""}">${((m.Accuracy || 0) * 100).toFixed(2)}%</td>
+                    <td class="${m.Model === best.Model ? "highlight" : ""}">${(m["ROC-AUC"] || 0).toFixed(4)}</td>
+                    <td>${(m["F1 Score"] || 0).toFixed(4)}</td>
+                    <td>${(m["Log Loss"] || 0).toFixed(4)}</td>
+                    <td>${(m["CV Mean"] || 0).toFixed(4)} &plusmn; ${(m["CV Std"] || 0).toFixed(4)}</td>
+                </tr>
+            `,
+          )
+          .join("");
+      }
+
+      function renderInjuries(data) {
+        const table = $("#injuryTable");
+        const empty = $("#injuryEmpty");
+        if (!data || !data.injuries || data.injuries.length === 0) {
+          empty.style.display = "block";
+          return;
+        }
+
+        table.innerHTML = data.injuries
+          .map(
+            (p) => `
+                <tr>
+                    <td><strong>${p.PLAYER_NAME || p.player_name || ""}</strong></td>
+                    <td>${p.TEAM_ABBREVIATION || p.team || ""}</td>
+                    <td>${(p.PTS || 0).toFixed(1)}</td>
+                    <td>${(p.REB || 0).toFixed(1)}</td>
+                    <td>${(p.AST || 0).toFixed(1)}</td>
+                    <td>${(p.player_value || 0).toFixed(1)}</td>
+                    <td><span class="injury-tag out">OUT / LIMITED</span></td>
+                </tr>
+            `,
+          )
+          .join("");
+      }
+
+      async function updateStatus() {
+        const data = await fetchJSON("/api/status");
+        if (!data) {
+          $("#statusBar").innerHTML =
+            '<span class="status-dot inactive"></span>Offline';
+          return;
+        }
+        const ok = data.model_trained && data.predictions_ready;
+        $("#statusBar").innerHTML = `
+                <span class="status-dot ${ok ? "active" : "inactive"}"></span>
+                ${ok ? "Model: " + data.best_model + " | Ready" : "Run pipeline.py to initialize"}
+            `;
+      }
+
+      async function init() {
+        updateStatus();
+        const [preds, models, injuries] = await Promise.all([
+          fetchJSON("/api/predictions"),
+          fetchJSON("/api/models"),
+          fetchJSON("/api/injuries"),
+        ]);
+        renderPredictions(preds);
+        renderModels(models);
+        renderInjuries(injuries);
+      }
+
+      init();
+      setInterval(updateStatus, 30000);
+    </script>
+  </body>
+</html>

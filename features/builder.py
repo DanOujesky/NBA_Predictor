@@ -1,0 +1,94 @@
+"""Orchestrates feature engineering and builds the final training dataset."""
+
+import logging
+
+import numpy as np
+import pandas as pd
+
+from config import PROCESSED_DIR
+from features.team_features import build_team_features
+from features.player_features import compute_team_roster_strength
+
+logger = logging.getLogger(__name__)
+
+DIFF_FEATURES = [
+    "diff_pts", "diff_opp_pts", "diff_fg_pct", "diff_reb",
+    "diff_ast", "diff_tov", "diff_form", "diff_streak",
+    "diff_rest", "diff_roster",
+]
+
+ALL_FEATURES = DIFF_FEATURES + ["is_home", "is_b2b"]
+
+
+def build_matchup_differentials(df: pd.DataFrame) -> pd.DataFrame:
+    """Compute head-to-head feature differentials between teams.
+
+    For each game, joins the opponent's rolling stats and calculates the
+    difference. Positive values favor the row's team.
+    """
+    roll_cols = [c for c in df.columns if c.startswith("roll_") or c in ("form", "streak", "rest_days")]
+    opp = df[["Date", "Team"] + roll_cols].copy()
+    opp.columns = ["Date", "Opponent"] + [f"opp_{c}" for c in roll_cols]
+
+    merged = df.merge(opp, on=["Date", "Opponent"], how="inner")
+    if merged.empty:
+        logger.error("Matchup merge produced 0 rows; check team name consistency")
+        raise ValueError("Team name mismatch between team and opponent columns")
+
+    col_pairs = [
+        ("roll_PTS", "opp_roll_PTS", "diff_pts"),
+        ("roll_OPP_PTS", "opp_roll_OPP_PTS", "diff_opp_pts"),
+        ("roll_FG_PCT", "opp_roll_FG_PCT", "diff_fg_pct"),
+        ("roll_REB", "opp_roll_REB", "diff_reb"),
+        ("roll_AST", "opp_roll_AST", "diff_ast"),
+        ("roll_TOV", "opp_roll_TOV", "diff_tov"),
+        ("form", "opp_form", "diff_form"),
+        ("streak", "opp_streak", "diff_streak"),
+        ("rest_days", "opp_rest_days", "diff_rest"),
+    ]
+    for team_col, opp_col, diff_col in col_pairs:
+        if team_col in merged.columns and opp_col in merged.columns:
+            merged[diff_col] = merged[team_col] - merged[opp_col]
+
+    return merged
+
+
+def add_roster_features(df: pd.DataFrame, player_stats: pd.DataFrame | None) -> pd.DataFrame:
+    """Attach roster strength differential to the matchup dataset."""
+    if player_stats is None or player_stats.empty:
+        df["diff_roster"] = 0.0
+        return df
+
+    roster = compute_team_roster_strength(player_stats)
+    df = df.merge(
+        roster[["Team", "availability_ratio"]],
+        on="Team", how="left",
+    ).rename(columns={"availability_ratio": "team_avail"})
+    df = df.merge(
+        roster[["Team", "availability_ratio"]].rename(columns={"Team": "Opponent", "availability_ratio": "opp_avail"}),
+        on="Opponent", how="left",
+    )
+    df["team_avail"] = df["team_avail"].fillna(1.0)
+    df["opp_avail"] = df["opp_avail"].fillna(1.0)
+    df["diff_roster"] = df["team_avail"] - df["opp_avail"]
+    return df
+
+
+def build_dataset(games: pd.DataFrame, player_stats: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Full feature-building pipeline: team stats, matchup diffs, roster impact.
+
+    Returns a DataFrame with all features and the target column ready for training.
+    """
+    logger.info("Building feature dataset from %d games", len(games))
+    df = build_team_features(games)
+    df = df.dropna(subset=["roll_PTS", "form"])
+    df = build_matchup_differentials(df)
+    df = add_roster_features(df, player_stats)
+
+    available = [c for c in ALL_FEATURES if c in df.columns]
+    meta = ["Team", "Opponent", "Date", "Win"]
+    final = df[available + meta].dropna(subset=available)
+
+    final.to_csv(PROCESSED_DIR / "features.csv", index=False)
+    logger.info("Feature dataset built: %d rows, %d features", len(final), len(available))
+    return final

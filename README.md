@@ -74,7 +74,7 @@ The evaluator trains all three on the same train/test split and compares them on
 ## Setup
 
 ```bash
-pip install -r requirements.txt
+py -m pip install -r requirements.txt
 ```
 
 ## Usage
@@ -82,25 +82,25 @@ pip install -r requirements.txt
 ### 1. Run the full pipeline (collect data, build features, train models):
 
 ```bash
-python pipeline.py
+py pipeline.py
 ```
 
 This takes time on first run due to data collection. Use `--skip-scrape` on subsequent runs to reuse existing data:
 
 ```bash
-python pipeline.py --skip-scrape
+py pipeline.py --skip-scrape
 ```
 
 To only retrain models without re-processing data:
 
 ```bash
-python pipeline.py --train-only
+py pipeline.py --train-only
 ```
 
 ### 2. Start the web dashboard:
 
 ```bash
-python app.py
+py app.py
 ```
 
 Open http://localhost:5000 in your browser. The dashboard shows game predictions, model comparison metrics, and the injury report.

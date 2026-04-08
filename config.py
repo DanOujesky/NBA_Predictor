@@ -23,6 +23,9 @@ TEST_SIZE = 0.2
 RANDOM_STATE = 42
 CV_FOLDS = 5
 
+FLASK_HOST = "127.0.0.1"
+FLASK_PORT = 5000
+
 TEAM_ABBREVIATION_FIXES = {
     "ATL": "ATL",
     "BOS": "BOS",
@@ -76,6 +79,18 @@ NBA_TEAM_IDS = {
     "TOR": 1610612761, "UTA": 1610612762, "WAS": 1610612764,
 }
 
+# ESPN uses different 2-3 letter codes that must be mapped to our canonical abbreviations
+ESPN_ABBR_FIXES = {
+    "BKN": "BRK", "GS": "GSW", "NY": "NYK", "SA": "SAS",
+    "NO": "NOP", "CHA": "CHO", "PHX": "PHO", "WSH": "WAS",
+    "UTA": "UTA", "UTAH": "UTA", "ATL": "ATL", "BOS": "BOS", "CHI": "CHI",
+    "CLE": "CLE", "DAL": "DAL", "DEN": "DEN", "DET": "DET",
+    "HOU": "HOU", "IND": "IND", "LAC": "LAC", "LAL": "LAL",
+    "MEM": "MEM", "MIA": "MIA", "MIL": "MIL", "MIN": "MIN",
+    "OKC": "OKC", "ORL": "ORL", "PHI": "PHI", "POR": "POR",
+    "SAC": "SAC", "TOR": "TOR",
+}
+
 TEAM_NAME_TO_ABBR = {
     "Atlanta Hawks": "ATL",
     "Boston Celtics": "BOS",
@@ -109,3 +124,6 @@ TEAM_NAME_TO_ABBR = {
     "Utah Jazz": "UTA",
     "Washington Wizards": "WAS",
 }
+
+# Reverse mapping: abbreviation → full team name
+TEAM_ABBR_TO_NAME = {v: k for k, v in TEAM_NAME_TO_ABBR.items() if k != "LA Clippers"}

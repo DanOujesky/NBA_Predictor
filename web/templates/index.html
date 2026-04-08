@@ -439,6 +439,26 @@
           .join("");
       }
 
+      function statusTag(p) {
+        const s = (p.status || "").toLowerCase();
+        if (s === "out" || s === "inactive" || s === "suspended") {
+          return `<span class="injury-tag out">Out</span>`;
+        }
+        if (s === "doubtful") {
+          return `<span class="injury-tag out">Doubtful</span>`;
+        }
+        if (s === "questionable" || s === "game time decision") {
+          return `<span class="injury-tag questionable">Questionable</span>`;
+        }
+        if (s === "day-to-day") {
+          return `<span class="injury-tag questionable">Day-To-Day</span>`;
+        }
+        if (s === "probable") {
+          return `<span class="injury-tag questionable">Probable</span>`;
+        }
+        return `<span class="injury-tag questionable">${p.status || "Limited"}</span>`;
+      }
+
       function renderInjuries(data) {
         const table = $("#injuryTable");
         const empty = $("#injuryEmpty");
@@ -451,13 +471,13 @@
           .map(
             (p) => `
                 <tr>
-                    <td><strong>${p.PLAYER_NAME || p.player_name || ""}</strong></td>
-                    <td>${p.TEAM_ABBREVIATION || p.team || ""}</td>
-                    <td>${(p.PTS || 0).toFixed(1)}</td>
-                    <td>${(p.REB || 0).toFixed(1)}</td>
-                    <td>${(p.AST || 0).toFixed(1)}</td>
-                    <td>${(p.player_value || 0).toFixed(1)}</td>
-                    <td><span class="injury-tag out">OUT / LIMITED</span></td>
+                    <td><strong>${p.player_name || p.PLAYER_NAME || ""}</strong></td>
+                    <td>${p.TEAM_ABBREVIATION || p.team_abbr || ""}</td>
+                    <td>${(parseFloat(p.PTS) || 0).toFixed(1)}</td>
+                    <td>${(parseFloat(p.REB) || 0).toFixed(1)}</td>
+                    <td>${(parseFloat(p.AST) || 0).toFixed(1)}</td>
+                    <td>${(parseFloat(p.player_value) || 0).toFixed(1)}</td>
+                    <td>${statusTag(p)}</td>
                 </tr>
             `,
           )

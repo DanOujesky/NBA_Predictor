@@ -12,16 +12,18 @@ from features.player_features import compute_team_roster_strength
 logger = logging.getLogger(__name__)
 
 DIFF_FEATURES = [
-    "diff_pts", "diff_opp_pts", "diff_fg_pct", "diff_reb",
-    "diff_ast", "diff_tov", "diff_form", "diff_streak",
-    "diff_rest", "diff_roster",
+    "diff_pts", "diff_opp_pts", "diff_fg_pct", "diff_fg3_pct",
+    "diff_reb", "diff_ast", "diff_tov", "diff_stl", "diff_blk",
+    "diff_form", "diff_streak", "diff_rest", "diff_roster", "diff_elo",
 ]
 
 ALL_FEATURES = DIFF_FEATURES + ["is_home", "is_b2b"]
 
-# Individual rolling columns kept in features.csv so they can be used at prediction time
-ROLL_COLS = ["roll_PTS", "roll_OPP_PTS", "roll_FG_PCT", "roll_REB", "roll_AST", "roll_TOV"]
-STATE_COLS = ["form", "streak", "rest_days"]
+ROLL_COLS = [
+    "roll_PTS", "roll_OPP_PTS", "roll_FG_PCT", "roll_FG3_PCT",
+    "roll_REB", "roll_AST", "roll_TOV", "roll_STL", "roll_BLK",
+]
+STATE_COLS = ["form", "streak", "rest_days", "elo"]
 
 
 def build_matchup_differentials(df: pd.DataFrame) -> pd.DataFrame:
@@ -32,29 +34,43 @@ def build_matchup_differentials(df: pd.DataFrame) -> pd.DataFrame:
     """
     roll_cols = [
         c for c in df.columns
-        if c.startswith("roll_") or c in ("form", "streak", "rest_days")
+        if c.startswith("roll_") or c in ("form", "streak", "rest_days", "elo")
     ]
+
+    team_values = set(df["Team"].unique())
+    opp_values = set(df["Opponent"].unique())
+    unmatched = opp_values - team_values
+    if unmatched:
+        logger.warning(
+            "Dropping %d unresolved opponent abbreviations before matchup merge: %s",
+            len(unmatched), sorted(unmatched)[:10],
+        )
+        df = df[df["Opponent"].isin(team_values)].copy()
+
     opp = df[["Date", "Team"] + roll_cols].copy()
     opp.columns = ["Date", "Opponent"] + [f"opp_{c}" for c in roll_cols]
 
     merged = df.merge(opp, on=["Date", "Opponent"], how="inner")
     if merged.empty:
-        logger.error(
-            "Matchup merge produced 0 rows — verify team abbreviation consistency "
-            "between Team and Opponent columns"
+        raise ValueError(
+            "Matchup merge produced 0 rows — all Opponent values lack a matching Team row. "
+            "Check TEAM_ABBREVIATION_FIXES in config.py."
         )
-        raise ValueError("Team name mismatch: Opponent values don't match any Team value")
 
     col_pairs = [
-        ("roll_PTS",     "opp_roll_PTS",     "diff_pts"),
-        ("roll_OPP_PTS", "opp_roll_OPP_PTS", "diff_opp_pts"),
-        ("roll_FG_PCT",  "opp_roll_FG_PCT",  "diff_fg_pct"),
-        ("roll_REB",     "opp_roll_REB",     "diff_reb"),
-        ("roll_AST",     "opp_roll_AST",     "diff_ast"),
-        ("roll_TOV",     "opp_roll_TOV",     "diff_tov"),
-        ("form",         "opp_form",         "diff_form"),
-        ("streak",       "opp_streak",       "diff_streak"),
-        ("rest_days",    "opp_rest_days",     "diff_rest"),
+        ("roll_PTS",        "opp_roll_PTS",        "diff_pts"),
+        ("roll_OPP_PTS",    "opp_roll_OPP_PTS",    "diff_opp_pts"),
+        ("roll_FG_PCT",     "opp_roll_FG_PCT",     "diff_fg_pct"),
+        ("roll_FG3_PCT",    "opp_roll_FG3_PCT",    "diff_fg3_pct"),
+        ("roll_REB",        "opp_roll_REB",        "diff_reb"),
+        ("roll_AST",        "opp_roll_AST",        "diff_ast"),
+        ("roll_TOV",        "opp_roll_TOV",        "diff_tov"),
+        ("roll_STL",        "opp_roll_STL",        "diff_stl"),
+        ("roll_BLK",        "opp_roll_BLK",        "diff_blk"),
+        ("form",            "opp_form",            "diff_form"),
+        ("streak",          "opp_streak",          "diff_streak"),
+        ("rest_days",       "opp_rest_days",       "diff_rest"),
+        ("elo",             "opp_elo",             "diff_elo"),
     ]
     for team_col, opp_col, diff_col in col_pairs:
         if team_col in merged.columns and opp_col in merged.columns:
@@ -114,10 +130,15 @@ def build_dataset(games: pd.DataFrame, player_data: pd.DataFrame | None = None) 
 
     available_features = [c for c in ALL_FEATURES if c in df.columns]
     meta = ["Team", "Opponent", "Date", "Win"]
-    # Keep individual rolling/state cols so prediction can reuse them
     extra_state = [c for c in ROLL_COLS + STATE_COLS if c in df.columns]
 
-    final = df[available_features + meta + extra_state].dropna(subset=available_features)
+    optional = {"diff_fg3_pct", "diff_stl", "diff_blk", "diff_roster", "diff_elo"}
+    for col in optional:
+        if col in df.columns:
+            df[col] = df[col].fillna(0.0)
+
+    core_required = [c for c in available_features if c not in optional]
+    final = df[available_features + meta + extra_state].dropna(subset=core_required)
 
     final.to_csv(PROCESSED_DIR / "features.csv", index=False)
     logger.info(

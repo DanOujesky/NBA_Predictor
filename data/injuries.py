@@ -8,6 +8,7 @@ import requests
 
 from config import (
     ESPN_ABBR_FIXES,
+    INJURY_STATUS_MAP,
     RAW_DIR,
     REQUEST_DELAY,
     REQUEST_TIMEOUT,
@@ -18,19 +19,7 @@ logger = logging.getLogger(__name__)
 
 ESPN_INJURIES_URL = "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries"
 
-# Injury status → availability factor in [0, 1]
-STATUS_TO_AVAILABILITY: dict[str, float] = {
-    "out": 0.0,
-    "inactive": 0.0,
-    "suspended": 0.0,
-    "doubtful": 0.1,
-    "questionable": 0.5,
-    "game time decision": 0.6,
-    "day-to-day": 0.75,
-    "probable": 0.9,
-    "active": 1.0,
-    "not injury related": 1.0,
-}
+STATUS_TO_AVAILABILITY = INJURY_STATUS_MAP
 
 PLAYER_VALUE_WEIGHTS = {
     "PTS": 1.0, "REB": 0.7, "AST": 1.0,
@@ -82,7 +71,12 @@ class InjuryReportFetcher:
         Columns: player_name, team_abbr, status, injury_type, comment,
                  availability_factor, is_available, player_value.
         """
-        df = self._fetch_espn(player_stats)
+        try:
+            df = self._fetch_espn(player_stats)
+        except Exception as exc:
+            logger.error("Unexpected error in ESPN fetch: %s", exc, exc_info=True)
+            df = None
+
         if df is not None and not df.empty:
             df.to_csv(RAW_DIR / "injury_report.csv", index=False)
             logger.info("Saved ESPN injury report: %d entries", len(df))
@@ -110,16 +104,11 @@ class InjuryReportFetcher:
 
         rows = []
         for team_block in data.get("injuries", []):
-            # ESPN structure: outer block has "displayName" (team name) and
-            # "injuries" (list of player entries). Team abbreviation is nested
-            # inside each entry under athlete.team.abbreviation.
             for entry in team_block.get("injuries", []):
                 athlete = entry.get("athlete", {})
-                # Prefer abbreviation from athlete.team; fall back to team block name
                 athlete_team = athlete.get("team", {})
                 espn_abbr = athlete_team.get("abbreviation", "")
                 if not espn_abbr:
-                    # Last resort: map full team name via TEAM_NAME_TO_ABBR
                     from config import TEAM_NAME_TO_ABBR
                     espn_abbr = TEAM_NAME_TO_ABBR.get(
                         athlete_team.get("displayName", team_block.get("displayName", "")), ""
@@ -167,7 +156,6 @@ class InjuryReportFetcher:
             on="player_name",
             how="left",
         )
-        # Keep the ESPN placeholder (0.0) where no player stats match
         merged["player_value"] = merged["_pv"].fillna(merged["player_value"])
         return merged.drop(columns=["_pv"])
 
@@ -203,10 +191,6 @@ def compute_team_availability(
 
     Returns a DataFrame with columns:
         team_abbr, roster_strength, available_strength, availability_ratio.
-
-    availability_ratio = (full_roster_value - lost_value) / full_roster_value
-    where lost_value = player_value * (1 - availability_factor) for each
-    injured player.
     """
     if injury_df.empty and (player_stats is None or player_stats.empty):
         return pd.DataFrame(
@@ -214,7 +198,6 @@ def compute_team_availability(
         )
 
     if player_stats is not None and not player_stats.empty:
-        # ── Full roster baseline from NBA API player stats ──────────────────
         ps = _normalise_player_stats(player_stats)
         if "team_abbr" not in ps.columns:
             logger.warning("player_stats missing team column; falling back to injury-only mode")
@@ -222,18 +205,14 @@ def compute_team_availability(
 
         full = ps.groupby("team_abbr")["player_value"].sum().rename("roster_strength")
 
-        # ── Compute lost value from injured players ──────────────────────────
         if not injury_df.empty:
             inj = injury_df.copy()
-            # Ensure boolean dtype for is_available (may be string after CSV round-trip)
             if inj["is_available"].dtype == object:
                 inj["is_available"] = inj["is_available"].map(
                     lambda x: str(x).strip().lower() == "true"
                 )
-            # Normalise availability_factor to float
             inj["availability_factor"] = pd.to_numeric(inj["availability_factor"], errors="coerce").fillna(1.0)
 
-            # Join player values from full roster if not already present
             if inj["player_value"].fillna(0).eq(0).all():
                 if "player_name" in inj.columns and "player_name" in ps.columns:
                     inj = inj.merge(
@@ -246,7 +225,6 @@ def compute_team_availability(
                     inj["player_value"] = inj["_pv"].fillna(0.0)
                     inj = inj.drop(columns=["_pv"])
 
-            # Lost value = fraction of player's value that is unavailable
             inj["lost_value"] = inj["player_value"] * (1.0 - inj["availability_factor"].clip(0, 1))
             lost = inj.groupby("team_abbr")["lost_value"].sum()
         else:
@@ -259,7 +237,6 @@ def compute_team_availability(
         result["availability_ratio"] = (result["available_strength"] / safe_total).clip(0, 1)
         return result.reset_index()
 
-    # ── Fallback: use only the injury report (less accurate) ────────────────
     return _availability_from_injury_only(injury_df)
 
 

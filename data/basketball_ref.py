@@ -9,7 +9,7 @@ import cloudscraper
 import pandas as pd
 
 from config import (
-    CURRENT_SEASON, MAX_RETRIES, RAW_DIR,
+    CURRENT_SEASON, MAX_RETRIES, RAW_DIR, SCHEDULE_CACHE_HOURS,
     REQUEST_DELAY, REQUEST_TIMEOUT, SEASONS_BACK, TEAMS,
 )
 
@@ -68,7 +68,7 @@ class BasketballRefScraper:
             df["Season"] = season
             return df.reset_index(drop=True)
         except Exception as exc:
-            logger.error("Parse error %s-%d: %s", team, season, exc)
+            logger.error("Parse error %s-%d: %s", team, season, exc, exc_info=True)
             return None
 
     def scrape_gamelogs(self) -> pd.DataFrame:
@@ -100,13 +100,22 @@ class BasketballRefScraper:
         return self._load_existing()
 
     def scrape_schedule(self) -> pd.DataFrame:
-        """Scrape upcoming NBA schedule from basketball-reference.com."""
-        months = [
-            "october", "november", "december", "january",
-            "february", "march", "april", "may", "june",
-        ]
+        """Scrape upcoming NBA schedule, using a cached file when fresh enough."""
+        schedule_path = RAW_DIR / "schedule.csv"
+        if schedule_path.exists():
+            age_hours = self._file_age_hours(schedule_path)
+            if age_hours < SCHEDULE_CACHE_HOURS:
+                logger.info("Schedule cache is %.1fh old — skipping re-scrape", age_hours)
+                return pd.read_csv(schedule_path)
+
+        today = pd.Timestamp.today()
+        months_to_fetch = []
+        for offset in range(3):
+            m = today + pd.DateOffset(months=offset)
+            months_to_fetch.append(m.strftime("%B").lower())
+
         all_games = []
-        for month in months:
+        for month in months_to_fetch:
             url = self.SCHEDULE_URL.format(year=CURRENT_SEASON, month=month)
             html = self.fetch_page(url)
             if not html:
@@ -119,7 +128,7 @@ class BasketballRefScraper:
                 df = df.rename(columns={"Visitor/Neutral": "Away", "Home/Neutral": "Home"})
                 df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
                 df = df.dropna(subset=["Date"])
-                future = df[df["Date"] >= pd.Timestamp.today().normalize()]
+                future = df[df["Date"] >= today.normalize()]
                 if not future.empty:
                     all_games.append(future[["Date", "Home", "Away"]])
             except Exception as exc:
@@ -128,9 +137,21 @@ class BasketballRefScraper:
 
         if all_games:
             result = pd.concat(all_games).drop_duplicates().reset_index(drop=True)
-            result.to_csv(RAW_DIR / "schedule.csv", index=False)
+            result.to_csv(schedule_path, index=False)
             return result
+        # If scrape failed but we have a stale cache, use it rather than returning empty
+        if schedule_path.exists():
+            logger.warning("Schedule scrape failed; using stale cache")
+            return pd.read_csv(schedule_path)
         return pd.DataFrame(columns=["Date", "Home", "Away"])
+
+    @staticmethod
+    def _file_age_hours(path: Path) -> float:
+        import os
+        from datetime import datetime
+        mtime = os.path.getmtime(path)
+        age = datetime.now().timestamp() - mtime
+        return age / 3600
 
     def _load_completed(self) -> set:
         if not self.output_path.exists():
@@ -143,7 +164,11 @@ class BasketballRefScraper:
 
     def _load_existing(self) -> pd.DataFrame:
         if self.output_path.exists():
-            return pd.read_csv(self.output_path)
+            df = pd.read_csv(self.output_path)
+            key_cols = [c for c in ["Team", "Date", "Season"] if c in df.columns]
+            if key_cols:
+                df = df.drop_duplicates(subset=key_cols).reset_index(drop=True)
+            return df
         return pd.DataFrame()
 
     @staticmethod

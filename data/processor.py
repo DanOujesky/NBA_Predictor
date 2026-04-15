@@ -30,7 +30,6 @@ def _normalize_abbr(value: str) -> str:
 class DataProcessor:
     """Merges, cleans, and normalises data from both NBA data sources."""
 
-    # Columns coerced to numeric in both sources
     NUMERIC_COLS = [
         "PTS", "OPP_PTS", "FG_PCT", "FG3_PCT", "FT_PCT",
         "REB", "AST", "STL", "BLK", "TOV", "PLUS_MINUS",
@@ -47,7 +46,7 @@ class DataProcessor:
         if df.empty:
             return df
         df = df.copy()
-        df["Date"] = pd.to_datetime(df["GAME_DATE"], format="%b %d, %Y")
+        df["Date"] = pd.to_datetime(df["GAME_DATE"], errors="coerce")
         df["is_home"] = df["MATCHUP"].str.contains("vs.").astype(int)
         df["Opponent"] = (
             df["MATCHUP"]
@@ -138,7 +137,6 @@ class DataProcessor:
             bref_extra = bref_df[~bref_df["Date"].dt.date.isin(nba_dates)]
             combined = pd.concat([nba_api_df, bref_extra], ignore_index=True)
 
-        # Deduplicate before the OPP_PTS self-join to guarantee unique (Team, Date) keys
         combined = (
             combined
             .drop_duplicates(subset=["Team", "Date"])
@@ -146,8 +144,6 @@ class DataProcessor:
             .reset_index(drop=True)
         )
 
-        # Derive OPP_PTS: for a game where Team=A played Opponent=B,
-        # the opponent's score = B's PTS on the same date.
         if "OPP_PTS" not in combined.columns:
             combined["OPP_PTS"] = float("nan")
 
@@ -160,7 +156,6 @@ class DataProcessor:
         combined["OPP_PTS"] = combined["OPP_PTS"].fillna(combined["_derived_opp_pts"])
         combined = combined.drop(columns=["_derived_opp_pts"])
 
-        # Derive Win from PTS/OPP_PTS for rows that still lack it
         if "Win" not in combined.columns:
             combined["Win"] = np.nan
         mask = combined["Win"].isna() & combined["PTS"].notna() & combined["OPP_PTS"].notna()

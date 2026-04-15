@@ -1,5 +1,3 @@
-"""Source 2: NBA official stats API for team/player data."""
-
 import logging
 import time
 
@@ -8,24 +6,18 @@ from nba_api.stats.endpoints import (
     CommonTeamRoster,
     LeagueDashPlayerStats,
     LeagueDashTeamStats,
+    LeagueGameLog,
     TeamGameLog,
 )
 
-from config import CURRENT_SEASON, NBA_TEAM_IDS, RAW_DIR, REQUEST_DELAY
+from config import CURRENT_SEASON, NBA_TEAM_IDS, RAW_DIR, REQUEST_DELAY, TEAM_ABBREVIATION_FIXES
 
 logger = logging.getLogger(__name__)
 
 
 class NBAStatsClient:
-    """Fetches data from the official NBA stats API via nba_api."""
 
     def fetch_team_gamelogs(self, season: str | None = None) -> pd.DataFrame:
-        """Fetch game logs for all 30 teams in the given season.
-
-        Returns a DataFrame with columns: Team, GAME_DATE, MATCHUP, WL,
-        PTS, FGM, FGA, FG_PCT, FG3_PCT, FT_PCT, REB, AST, STL, BLK,
-        TOV, PLUS_MINUS. Team is set to our canonical 3-letter abbreviation.
-        """
         season = season or self._season_string(CURRENT_SEASON)
         frames = []
         for abbr, team_id in NBA_TEAM_IDS.items():
@@ -36,7 +28,7 @@ class NBAStatsClient:
                     season_type_all_star="Regular Season",
                 )
                 df = log.get_data_frames()[0]
-                df["Team"] = abbr  # canonical abbreviation from NBA_TEAM_IDS
+                df["Team"] = abbr
                 frames.append(df)
                 time.sleep(REQUEST_DELAY / 3)
             except Exception as exc:
@@ -50,8 +42,36 @@ class NBAStatsClient:
         logger.info("Fetched %d game log rows from NBA API", len(result))
         return result
 
+    def fetch_incremental_gamelogs(self, since_date: str) -> pd.DataFrame:
+        """Fetch all team games since since_date in a single API call.
+
+        since_date: MM/DD/YYYY format string.
+        Returns rows that can be merged into the existing gamelogs CSV.
+        """
+        season = self._season_string(CURRENT_SEASON)
+        try:
+            time.sleep(REQUEST_DELAY)
+            log = LeagueGameLog(
+                league_id="00",
+                season=season,
+                season_type_all_star="Regular Season",
+                date_from_nullable=since_date,
+            )
+            df = log.get_data_frames()[0]
+            if df.empty:
+                logger.info("No new games found since %s", since_date)
+                return pd.DataFrame()
+
+            df["Team"] = df["TEAM_ABBREVIATION"].map(
+                lambda x: TEAM_ABBREVIATION_FIXES.get(str(x).strip(), str(x).strip())
+            )
+            logger.info("Incremental fetch: %d game rows since %s", len(df), since_date)
+            return df
+        except Exception as exc:
+            logger.error("Incremental gamelog fetch failed: %s", exc)
+            return pd.DataFrame()
+
     def fetch_team_advanced_stats(self, season: str | None = None) -> pd.DataFrame:
-        """Fetch advanced team stats (offensive/defensive ratings, pace)."""
         season = season or self._season_string(CURRENT_SEASON)
         try:
             stats = LeagueDashTeamStats(
@@ -68,12 +88,6 @@ class NBAStatsClient:
             return pd.DataFrame()
 
     def fetch_player_stats(self, season: str | None = None) -> pd.DataFrame:
-        """Fetch per-game stats for all players in the season.
-
-        Saved columns include: PLAYER_NAME, TEAM_ABBREVIATION, GP, MIN,
-        PTS, REB, AST, STL, BLK, TOV. Used for computing player values
-        and GP-based availability fallback in the injury pipeline.
-        """
         season = season or self._season_string(CURRENT_SEASON)
         try:
             stats = LeagueDashPlayerStats(
@@ -88,7 +102,6 @@ class NBAStatsClient:
             return pd.DataFrame()
 
     def fetch_team_roster(self, team_abbr: str, season: str | None = None) -> pd.DataFrame:
-        """Fetch current roster for a specific team."""
         season = season or self._season_string(CURRENT_SEASON)
         team_id = NBA_TEAM_IDS.get(team_abbr)
         if not team_id:

@@ -2,16 +2,16 @@
 
 from flask import Flask
 
-from config import FLASK_HOST, FLASK_PORT
+from config import BUNDLE_DIR, FLASK_HOST, FLASK_PORT
 from web.routes import bp
 
 
 def create_app() -> Flask:
-    """Create and configure the Flask application."""
+    static_path = BUNDLE_DIR / "web" / "static"
     app = Flask(
         __name__,
-        template_folder="web/templates",
-        static_folder="web/static",
+        template_folder=str(BUNDLE_DIR / "web" / "templates"),
+        static_folder=str(static_path) if static_path.exists() else None,
     )
     app.register_blueprint(bp)
     return app
@@ -19,4 +19,4 @@ def create_app() -> Flask:
 
 if __name__ == "__main__":
     app = create_app()
-    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=True)
+    app.run(host=FLASK_HOST, port=FLASK_PORT, debug=False)

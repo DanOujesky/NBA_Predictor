@@ -1,6 +1,13 @@
+import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys.executable).parent
+    BUNDLE_DIR = Path(sys._MEIPASS)
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+    BUNDLE_DIR = BASE_DIR
+
 STORAGE_DIR = BASE_DIR / "storage"
 RAW_DIR = STORAGE_DIR / "raw"
 PROCESSED_DIR = STORAGE_DIR / "processed"
@@ -25,6 +32,11 @@ CV_FOLDS = 5
 
 FLASK_HOST = "127.0.0.1"
 FLASK_PORT = 5000
+
+UPDATE_CACHE_HOURS = 3
+SCHEDULE_CACHE_HOURS = 12
+
+LAST_UPDATED_FILE = STORAGE_DIR / "last_updated.txt"
 
 TEAM_ABBREVIATION_FIXES = {
     "ATL": "ATL",
@@ -79,7 +91,6 @@ NBA_TEAM_IDS = {
     "TOR": 1610612761, "UTA": 1610612762, "WAS": 1610612764,
 }
 
-# ESPN uses different 2-3 letter codes that must be mapped to our canonical abbreviations
 ESPN_ABBR_FIXES = {
     "BKN": "BRK", "GS": "GSW", "NY": "NYK", "SA": "SAS",
     "NO": "NOP", "CHA": "CHO", "PHX": "PHO", "WSH": "WAS",
@@ -125,5 +136,17 @@ TEAM_NAME_TO_ABBR = {
     "Washington Wizards": "WAS",
 }
 
-# Reverse mapping: abbreviation → full team name
 TEAM_ABBR_TO_NAME = {v: k for k, v in TEAM_NAME_TO_ABBR.items() if k != "LA Clippers"}
+
+INJURY_STATUS_MAP: dict[str, float] = {
+    "out": 0.0,
+    "inactive": 0.0,
+    "suspended": 0.0,
+    "doubtful": 0.1,
+    "questionable": 0.5,
+    "game time decision": 0.6,
+    "day-to-day": 0.75,
+    "probable": 0.9,
+    "active": 1.0,
+    "not injury related": 1.0,
+}

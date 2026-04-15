@@ -53,11 +53,28 @@ class ModelEvaluator:
         Returns:
             DataFrame comparing all models on key metrics.
         """
-        X = df[feature_cols]
-        y = df[target]
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y,
-        )
+        if "Date" in df.columns:
+            sorted_df = df.sort_values("Date").reset_index(drop=True)
+            split_idx = int(len(sorted_df) * (1 - TEST_SIZE))
+            train_df = sorted_df.iloc[:split_idx]
+            test_df = sorted_df.iloc[split_idx:]
+            X_train = train_df[feature_cols]
+            y_train = train_df[target]
+            X_test = test_df[feature_cols]
+            y_test = test_df[target]
+            logger.info(
+                "Temporal split: train=%d rows (up to %s), test=%d rows (from %s)",
+                len(train_df),
+                train_df["Date"].max().date(),
+                len(test_df),
+                test_df["Date"].min().date(),
+            )
+        else:
+            X = df[feature_cols]
+            y = df[target]
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y,
+            )
 
         self.results.clear()
         best_auc = -1.0
@@ -70,18 +87,19 @@ class ModelEvaluator:
             probs = model.predict_proba(X_test)
             inner_model = getattr(model, "model", None) or model
             try:
-                cv = cross_val_score(inner_model, X, y, cv=CV_FOLDS, scoring="accuracy")
+                cv = cross_val_score(inner_model, X_train, y_train, cv=CV_FOLDS, scoring="roc_auc")
             except Exception:
-                cv = np.array([accuracy_score(y_test, preds)])
+                logger.warning("cross_val_score failed for %s; using test-set AUC as CV estimate", model.name)
+                cv = np.array([roc_auc_score(y_test, probs)])
 
             result = ModelResult(
                 name=model.name,
-                accuracy=accuracy_score(y_test, preds),
-                roc_auc=roc_auc_score(y_test, probs),
-                f1=f1_score(y_test, preds),
-                log_loss_val=log_loss(y_test, probs),
-                cv_mean=cv.mean(),
-                cv_std=cv.std(),
+                accuracy=round(accuracy_score(y_test, preds), 4),
+                roc_auc=round(roc_auc_score(y_test, probs), 4),
+                f1=round(f1_score(y_test, preds), 4),
+                log_loss_val=round(log_loss(y_test, probs), 4),
+                cv_mean=round(float(cv.mean()), 4),
+                cv_std=round(float(cv.std()), 4),
             )
             self.results.append(result)
             logger.info(
@@ -101,12 +119,12 @@ class ModelEvaluator:
         rows = [
             {
                 "Model": r.name,
-                "Accuracy": round(r.accuracy, 4),
-                "ROC-AUC": round(r.roc_auc, 4),
-                "F1 Score": round(r.f1, 4),
-                "Log Loss": round(r.log_loss_val, 4),
-                "CV Mean": round(r.cv_mean, 4),
-                "CV Std": round(r.cv_std, 4),
+                "Accuracy": r.accuracy,
+                "ROC-AUC": r.roc_auc,
+                "F1 Score": r.f1,
+                "Log Loss": r.log_loss_val,
+                "CV AUC Mean": r.cv_mean,
+                "CV AUC Std": r.cv_std,
             }
             for r in self.results
         ]

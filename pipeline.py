@@ -25,7 +25,6 @@ from features.builder import ALL_FEATURES, ROLL_COLS, STATE_COLS, build_dataset
 from models.evaluator import ModelEvaluator
 from models.logistic import LogisticModel
 from models.random_forest import RandomForestModel
-from models.xgboost_model import XGBoostModel
 
 logging.basicConfig(
     level=logging.INFO,
@@ -191,17 +190,10 @@ def train_models(features: pd.DataFrame) -> pd.DataFrame:
     feature_cols = [c for c in ALL_FEATURES if c in features.columns]
     logger.info("Training with %d features: %s", len(feature_cols), feature_cols)
 
-    try:
-        from models.lightgbm_model import LightGBMModel
-        models = [
-            LogisticModel(),
-            XGBoostModel(auto_tune=True),
-            RandomForestModel(auto_tune=True),
-            LightGBMModel(auto_tune=True),
-        ]
-    except ImportError:
-        logger.warning("LightGBM not available; training without it")
-        models = [LogisticModel(), XGBoostModel(auto_tune=True), RandomForestModel(auto_tune=True)]
+    models = [
+        LogisticModel(),
+        RandomForestModel(auto_tune=True),
+    ]
 
     evaluator = ModelEvaluator(models)
     comparison = evaluator.run(features, feature_cols)

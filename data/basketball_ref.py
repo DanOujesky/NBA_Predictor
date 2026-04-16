@@ -23,6 +23,9 @@ class BasketballRefScraper:
     SCHEDULE_URL = (
         "https://www.basketball-reference.com/leagues/NBA_{year}_games-{month}.html"
     )
+    PLAYOFF_SCHEDULE_URL = (
+        "https://www.basketball-reference.com/playoffs/NBA_{year}_games.html"
+    )
 
     def __init__(self):
         self.scraper = cloudscraper.create_scraper(
@@ -135,8 +138,35 @@ class BasketballRefScraper:
                 logger.warning("Schedule parse error for %s: %s", month, exc)
             time.sleep(REQUEST_DELAY)
 
+        # Also try the playoff schedule (different URL on Basketball Reference)
+        playoff_url = self.PLAYOFF_SCHEDULE_URL.format(year=CURRENT_SEASON)
+        playoff_html = self.fetch_page(playoff_url)
+        if playoff_html:
+            try:
+                tables = pd.read_html(StringIO(playoff_html))
+                df = next((t for t in tables if "Date" in t.columns), None)
+                if df is not None:
+                    df = df.rename(columns={"Visitor/Neutral": "Away", "Home/Neutral": "Home"})
+                    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+                    df = df.dropna(subset=["Date"])
+                    future = df[df["Date"] >= today.normalize()]
+                    if not future.empty:
+                        all_games.append(future[["Date", "Home", "Away"]])
+                        logger.info("Fetched %d upcoming playoff games", len(future))
+            except Exception as exc:
+                logger.warning("Playoff schedule parse error: %s", exc)
+
+        # Always supplement with NBA API schedule (covers playoffs and play-in games)
+        try:
+            from data.nba_stats import NBAStatsClient
+            nba_sched = NBAStatsClient().fetch_upcoming_schedule(days_ahead=21)
+            if not nba_sched.empty:
+                all_games.append(nba_sched)
+        except Exception as exc:
+            logger.warning("NBA API schedule fallback failed: %s", exc)
+
         if all_games:
-            result = pd.concat(all_games).drop_duplicates().reset_index(drop=True)
+            result = pd.concat(all_games).drop_duplicates(subset=["Date", "Home", "Away"]).reset_index(drop=True)
             result.to_csv(schedule_path, index=False)
             return result
         # If scrape failed but we have a stale cache, use it rather than returning empty

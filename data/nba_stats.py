@@ -7,6 +7,7 @@ from nba_api.stats.endpoints import (
     LeagueDashPlayerStats,
     LeagueDashTeamStats,
     LeagueGameLog,
+    ScheduleLeagueV2,
     TeamGameLog,
 )
 
@@ -113,6 +114,41 @@ class NBAStatsClient:
         except Exception as exc:
             logger.error("Failed to fetch roster for %s: %s", team_abbr, exc)
             return pd.DataFrame()
+
+    def fetch_upcoming_schedule(self, days_ahead: int = 14) -> pd.DataFrame:
+        """Return upcoming games from the NBA API schedule endpoint.
+
+        Returns a DataFrame with columns: Date, Home, Away.
+        """
+        season = self._season_string(CURRENT_SEASON)
+        try:
+            time.sleep(REQUEST_DELAY)
+            sched = ScheduleLeagueV2(league_id="00", season=season, timeout=30)
+            df = sched.get_data_frames()[0]
+        except Exception as exc:
+            logger.error("ScheduleLeagueV2 fetch failed: %s", exc)
+            return pd.DataFrame(columns=["Date", "Home", "Away"])
+
+        df["Date"] = pd.to_datetime(df["gameDate"], errors="coerce")
+        today = pd.Timestamp.today().normalize()
+        cutoff = today + pd.Timedelta(days=days_ahead)
+        upcoming = df[(df["Date"] >= today) & (df["Date"] <= cutoff)].copy()
+
+        if upcoming.empty:
+            return pd.DataFrame(columns=["Date", "Home", "Away"])
+
+        upcoming["Home"] = (
+            upcoming["homeTeam_teamCity"].fillna("") + " " + upcoming["homeTeam_teamName"].fillna("")
+        ).str.strip()
+        upcoming["Away"] = (
+            upcoming["awayTeam_teamCity"].fillna("") + " " + upcoming["awayTeam_teamName"].fillna("")
+        ).str.strip()
+
+        result = upcoming[["Date", "Home", "Away"]]
+        result = result[result["Home"].str.strip().ne("") & result["Away"].str.strip().ne("")]
+        result = result.drop_duplicates().reset_index(drop=True)
+        logger.info("NBA API schedule: %d upcoming games (next %d days)", len(result), days_ahead)
+        return result
 
     @staticmethod
     def _season_string(year: int) -> str:

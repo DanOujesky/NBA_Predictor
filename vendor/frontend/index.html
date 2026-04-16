@@ -176,7 +176,6 @@
     <div class="container">
       <div class="tabs">
         <div class="tab active" data-panel="predictions">Predictions</div>
-        <div class="tab" data-panel="backtest">Backtest</div>
         <div class="tab" data-panel="models">Model Comparison</div>
         <div class="tab" data-panel="injuries">Injury Report</div>
       </div>
@@ -211,29 +210,6 @@
         <div class="empty-state" id="modelEmpty" style="display: none">
           <h3>No model results yet</h3>
           <p>Models are trained on first run and after significant new game data arrives.</p>
-        </div>
-      </div>
-
-      <div id="backtest" class="panel">
-        <div class="metric-row" id="backtestMetrics"></div>
-        <div class="card">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Away</th>
-                <th>Home</th>
-                <th>Predicted Winner</th>
-                <th>Actual Winner</th>
-                <th>Result</th>
-              </tr>
-            </thead>
-            <tbody id="backtestTable"></tbody>
-          </table>
-        </div>
-        <div class="empty-state" id="backtestEmpty" style="display: none">
-          <h3>No backtest data available</h3>
-          <p>Run the pipeline to generate historical predictions.</p>
         </div>
       </div>
 
@@ -411,44 +387,6 @@
         `).join("");
       }
 
-      function renderBacktest(data) {
-        const table = $("#backtestTable");
-        const empty = $("#backtestEmpty");
-        const metrics = $("#backtestMetrics");
-
-        if (!data || !data.games || data.games.length === 0) {
-          empty.style.display = "block";
-          table.innerHTML = "";
-          metrics.innerHTML = "";
-          return;
-        }
-        empty.style.display = "none";
-
-        const pct = data.accuracy != null ? data.accuracy + "%" : "—";
-        metrics.innerHTML = `
-          <div class="metric"><div class="metric-value">${pct}</div><div class="metric-label">Accuracy (last ${data.total} games)</div></div>
-          <div class="metric"><div class="metric-value">${data.correct}</div><div class="metric-label">Correct Predictions</div></div>
-          <div class="metric"><div class="metric-value">${data.total - data.correct}</div><div class="metric-label">Incorrect Predictions</div></div>
-        `;
-
-        table.innerHTML = data.games.map((g) => {
-          const correct = g.correct === 1;
-          const resultHtml = correct
-            ? `<span style="color:#22c55e;font-weight:700;">✓ Correct</span>`
-            : `<span style="color:#ef4444;font-weight:700;">✗ Wrong</span>`;
-          const predStyle = correct ? "color:#22c55e" : "color:#ef4444";
-          return `
-            <tr>
-              <td class="muted">${g.date}</td>
-              <td>${g.away_team}</td>
-              <td>${g.home_team}</td>
-              <td style="${predStyle}"><strong>${g.predicted_winner}</strong></td>
-              <td>${g.actual_winner}</td>
-              <td>${resultHtml}</td>
-            </tr>`;
-        }).join("");
-      }
-
       async function updateStatus() {
         const data = await fetchJSON("/api/status");
         if (!data) {
@@ -478,7 +416,6 @@
         } else {
           badge.classList.remove("visible");
           if (_updateWasRunning) {
-            // Update just finished — show refresh button
             btn.classList.add("visible");
             _updateWasRunning = false;
             _needsRefresh = true;
@@ -493,31 +430,27 @@
       async function refreshAll() {
         $("#refreshBtn").classList.remove("visible");
         _needsRefresh = false;
-        const [preds, models, injuries, backtest] = await Promise.all([
+        const [preds, models, injuries] = await Promise.all([
           fetchJSON("/api/predictions"),
           fetchJSON("/api/models"),
           fetchJSON("/api/injuries"),
-          fetchJSON("/api/backtest"),
         ]);
         renderPredictions(preds);
         renderModels(models);
         renderInjuries(injuries);
-        renderBacktest(backtest);
         updateStatus();
       }
 
       async function init() {
         updateStatus();
-        const [preds, models, injuries, backtest] = await Promise.all([
+        const [preds, models, injuries] = await Promise.all([
           fetchJSON("/api/predictions"),
           fetchJSON("/api/models"),
           fetchJSON("/api/injuries"),
-          fetchJSON("/api/backtest"),
         ]);
         renderPredictions(preds);
         renderModels(models);
         renderInjuries(injuries);
-        renderBacktest(backtest);
       }
 
       init();

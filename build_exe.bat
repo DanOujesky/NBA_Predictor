@@ -9,11 +9,16 @@ call .venv\Scripts\activate
 pip install -r requirements.txt
 pip install pyinstaller
 
-pyinstaller --noconfirm --clean NBAPredictor.spec
+pyinstaller --noconfirm --clean vendor\build\NBAPredictor.spec
+if errorlevel 1 (
+    echo.
+    echo BUILD FAILED - viz chyby nahore
+    pause
+    exit /b 1
+)
 
-echo.
 if not exist "dist\NBAPredictor\NBAPredictor.exe" (
-    echo BUILD FAILED - viz vystup nahore
+    echo BUILD FAILED - NBAPredictor.exe nebyl vytvoren
     pause
     exit /b 1
 )
@@ -34,4 +39,22 @@ if exist "storage\trained" (
 
 echo.
 echo Build OK - dist\NBAPredictor\NBAPredictor.exe
+
+echo Balim do ZIP...
+where powershell >nul 2>&1
+if %errorlevel% == 0 (
+    powershell -Command "Compress-Archive -Path 'dist\NBAPredictor' -DestinationPath 'dist\NBAPredictor.zip' -Force"
+    if exist "dist\NBAPredictor.zip" (
+        for %%A in ("dist\NBAPredictor.zip") do echo ZIP hotov: %%~zA bytes - dist\NBAPredictor.zip
+    )
+) else (
+    echo PowerShell neni dostupny - zkopiruj slozku dist\NBAPredictor rucne
+)
+
+echo.
+echo === CO UDELAT DU SKOLY ===
+echo Moznost A ^(USB^): Zkopiruj slozku dist\NBAPredictor na USB flash disk
+echo Moznost B ^(siti^): Nahraj dist\NBAPredictor.zip na Google Drive / GitHub
+echo Ve skole: rozbal ZIP -^> spust NBAPredictor.exe
+echo.
 pause

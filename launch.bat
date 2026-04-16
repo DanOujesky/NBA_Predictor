@@ -20,7 +20,7 @@ if not exist .venv (
     )
 ) else (
     call .venv\Scripts\activate
-    py -c "import lightgbm, xgboost, flask, nba_api, cloudscraper" 2>nul || (
+    py -c "import flask, nba_api, cloudscraper" 2>nul || (
         echo Updating packages...
         pip install --quiet -r requirements.txt
     )

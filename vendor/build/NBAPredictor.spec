@@ -1,18 +1,21 @@
 # -*- mode: python ; coding: utf-8 -*-
+import os
 from PyInstaller.utils.hooks import collect_all, collect_data_files
+
+# SPECPATH is the directory containing this spec file (vendor/build).
+# Walk two levels up to reach the project root.
+project_root = os.path.abspath(os.path.join(SPECPATH, '..', '..'))
 
 nba_datas, nba_binaries, nba_hidden = collect_all('nba_api')
 scraper_datas, scraper_binaries, scraper_hidden = collect_all('cloudscraper')
-lgbm_datas, lgbm_binaries, lgbm_hidden = collect_all('lightgbm')
-xgb_datas, xgb_binaries, xgb_hidden = collect_all('xgboost')
 
 a = Analysis(
-    ['main.py'],
-    pathex=[],
-    binaries=nba_binaries + scraper_binaries + lgbm_binaries + xgb_binaries,
+    [os.path.join(project_root, 'main.py')],
+    pathex=[project_root],
+    binaries=nba_binaries + scraper_binaries,
     datas=[
-        ('web/templates', 'web/templates'),
-    ] + nba_datas + scraper_datas + lgbm_datas + xgb_datas + collect_data_files('certifi'),
+        (os.path.join(project_root, 'vendor', 'frontend'), 'vendor/frontend'),
+    ] + nba_datas + scraper_datas + collect_data_files('certifi'),
     hiddenimports=[
         'sklearn.utils._cython_blas',
         'sklearn.utils._typedefs',
@@ -26,9 +29,7 @@ a = Analysis(
         'sklearn.ensemble._forest',
         'sklearn.ensemble._gb_losses',
         'sklearn.linear_model._logistic',
-        'xgboost',
-        'xgboost.sklearn',
-        'xgboost.core',
+        'nba_api.stats.endpoints.scheduleleaguev2',
         'joblib',
         'lxml',
         'lxml.etree',
@@ -44,14 +45,18 @@ a = Analysis(
         'werkzeug',
         'itsdangerous',
         'click',
-        'lightgbm',
-        'lightgbm.sklearn',
-        'lightgbm.basic',
-    ] + nba_hidden + scraper_hidden + lgbm_hidden + xgb_hidden,
+    ] + nba_hidden + scraper_hidden,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['matplotlib', 'tkinter', 'PyQt5', 'PyQt6', 'wx', 'IPython', 'jupyter'],
+    excludes=[
+        'matplotlib', 'tkinter', 'PyQt5', 'PyQt6', 'wx',
+        'IPython', 'jupyter', 'notebook', 'nbformat', 'nbconvert',
+        'lightgbm', 'xgboost', 'torch', 'tensorflow', 'keras',
+        'PIL', 'Pillow', 'cv2',
+        'sqlalchemy', 'psycopg2', 'pymysql',
+        'docutils', 'sphinx',
+    ],
     noarchive=False,
     optimize=1,
 )

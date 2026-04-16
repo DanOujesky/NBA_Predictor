@@ -15,6 +15,7 @@ coverage/
 htmlcov/
 dist/
 build/
+!vendor/build/
 storage/raw/*.csv
 storage/processed/*.csv
 storage/trained/*.pkl

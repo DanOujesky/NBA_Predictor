@@ -1,3 +1,14 @@
+"""Centrální konfigurace projektu NBA Predictor.
+
+Obsahuje:
+- Cesty k adresářům (RAW_DIR, PROCESSED_DIR, MODEL_DIR, LOG_DIR)
+- Parametry scraping a API (REQUEST_DELAY, MAX_RETRIES, SEASONS_BACK)
+- Parametry feature engineering (ROLLING_WINDOW, FORM_WINDOW)
+- Parametry trénování modelů (TEST_SIZE, RANDOM_STATE, CV_FOLDS)
+- Mapovací slovníky zkratek týmů (NBA API ↔ Basketball Reference ↔ ESPN)
+- Slovník INJURY_STATUS_MAP pro převod textu stavu zranění na číslo dostupnosti
+"""
+
 import sys
 from pathlib import Path
 

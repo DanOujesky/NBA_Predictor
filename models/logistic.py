@@ -1,3 +1,5 @@
+"""Logistická regrese jako baseline klasifikátor pro predikci výsledků NBA zápasů."""
+
 from typing import Any
 
 import numpy as np
@@ -12,6 +14,13 @@ from models.base import BaseModel
 
 
 class LogisticModel(BaseModel):
+    """Logistická regrese s automatickým laděním hyperparametrů.
+
+    Pipeline: StandardScaler → LogisticRegression.
+    Škálování je nutné protože příznaky (diff_pts, diff_elo apod.) mají různé řády.
+    Při auto_tune=True prohledá PARAM_GRID pomocí GridSearchCV s CV_FOLDS foldy
+    a vybere kombinaci C + solver s nejvyšším ROC-AUC.
+    """
 
     PARAM_GRID = {
         "clf__C": [0.001, 0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 50.0, 100.0],

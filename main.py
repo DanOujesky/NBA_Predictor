@@ -30,10 +30,16 @@ RETRAIN_GAME_THRESHOLD = 30
 
 
 def _open_browser():
+    """Otevře výchozí prohlížeč na adrese Flask serveru."""
     webbrowser.open(f"http://{FLASK_HOST}:{FLASK_PORT}")
 
 
 def _count_new_games(new_df: pd.DataFrame) -> int:
+    """Odhadne počet nových zápasů z počtu řádků DataFrame.
+
+    NBA API vrací každý zápas dvakrát (jeden řádek pro každý tým),
+    proto se počet řádků dělí dvěma.
+    """
     if new_df is None or new_df.empty:
         return 0
     return max(len(new_df) // 2, 0)
@@ -88,11 +94,20 @@ def _run_background_update():
 
 
 def run():
+    """Hlavní vstupní bod aplikace.
+
+    Logika větvení:
+    - Pokud již existují predikce i model, spustí aktualizaci na pozadí
+      a okamžitě otevře prohlížeč.
+    - Při prvním spuštění (nebo chybějícím modelu) projde celou pipeline
+      synchronně a teprve pak otevře prohlížeč.
+
+    Po skončení pipeline vždy spustí Flask web server.
+    """
     has_predictions = (PROCESSED_DIR / "predictions.csv").exists()
     has_model = (MODEL_DIR / "best_model.pkl").exists()
 
     if has_predictions and has_model:
-        # Cached data exists — start Flask immediately and update in background
         update_thread = threading.Thread(target=_run_background_update, daemon=True)
         update_thread.start()
         Timer(1.5, _open_browser).start()

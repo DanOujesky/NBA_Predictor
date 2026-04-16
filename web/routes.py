@@ -1,3 +1,15 @@
+"""Flask Blueprint s API endpointy pro webový dashboard NBA Predictoru.
+
+Endpointy:
+  GET /                     - Hlavní stránka (index.html z vendor/frontend/)
+  GET /api/predictions      - Predikce nadcházejících zápasů + jméno modelu
+  GET /api/models           - Porovnávací tabulka všech natrénovaných modelů
+  GET /api/injuries         - Zpráva o zraněních (volitelný parametr ?team=XXX)
+  GET /api/teams            - Seznam všech 30 NBA týmů (zkratka + název)
+  GET /api/status           - Stav systému (model, data, predikce)
+  GET /api/update-status    - Průběh probíhající aktualizace dat
+"""
+
 import logging
 from pathlib import Path
 

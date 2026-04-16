@@ -67,6 +67,15 @@ def _gamelogs_last_date(path: Path) -> pd.Timestamp | None:
 
 
 def collect_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Stáhne kompletní dataset ze všech tří zdrojů.
+
+    Pořadí: NBA Stats API (aktuální sezóna) → ESPN injury report → Basketball Reference (5 sezón + rozvrh).
+
+    Returns:
+        nba_games:    DataFrame s herními logy z NBA Stats API.
+        bref_games:   DataFrame s herními logy z Basketball Reference.
+        player_stats: DataFrame s per-game statistikami hráčů.
+    """
     nba_client = NBAStatsClient()
     _set_status(progress="Fetching NBA API data...")
     logger.info("=== Fetching data from NBA Stats API ===")
@@ -100,7 +109,6 @@ def smart_update_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         logger.info("No existing gamelogs — running full data collection")
         return collect_data()
 
-    # Check if existing data is already fresh enough to skip the API entirely
     last_updated = _load_last_updated()
     if last_updated is not None:
         age_hours = (datetime.now() - last_updated).total_seconds() / 3600
@@ -114,7 +122,6 @@ def smart_update_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
     nba_client = NBAStatsClient()
 
-    # Determine the earliest date we need to (re)fetch
     last_game_date = _gamelogs_last_date(gamelogs_path)
     if last_game_date is None:
         logger.warning("Could not determine last game date — falling back to full fetch")
@@ -129,7 +136,6 @@ def smart_update_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
     if not new_games.empty:
         combined = pd.concat([existing, new_games], ignore_index=True)
-        # Deduplicate by GAME_ID + Team (each team has its own row per game)
         if "GAME_ID" in combined.columns:
             combined = combined.drop_duplicates(subset=["Team", "GAME_ID"])
         else:
@@ -177,6 +183,15 @@ def quick_update_data() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
 
 
 def process_data(nba_games: pd.DataFrame, bref_games: pd.DataFrame) -> pd.DataFrame:
+    """Vyčistí a sloučí data z obou zdrojů do jednoho DataFrame.
+
+    Interně volá DataProcessor: normalizace zkratek, parsování datumů,
+    odvození OPP_PTS ze vzájemného joinu, uložení do games_clean.csv.
+
+    Returns:
+        Sloučený DataFrame se sloupci Team, Opponent, Date, Win, is_home,
+        PTS, OPP_PTS, FG_PCT, FG3_PCT, REB, AST, TOV, STL, BLK.
+    """
     processor = DataProcessor()
     nba_clean = processor.process_nba_api_data(nba_games)
     bref_clean = processor.process_bref_data(bref_games)
@@ -186,6 +201,14 @@ def process_data(nba_games: pd.DataFrame, bref_games: pd.DataFrame) -> pd.DataFr
 
 
 def train_models(features: pd.DataFrame) -> pd.DataFrame:
+    """Natrénuje a porovná všechny registrované modely na feature datasetu.
+
+    Modely: LogisticModel (GridSearchCV) a RandomForestModel (RandomizedSearchCV).
+    Nejlepší model podle ROC-AUC se uloží do MODEL_DIR/best_model.pkl.
+
+    Returns:
+        DataFrame s porovnávací tabulkou metrik (Accuracy, ROC-AUC, F1, Log Loss, CV AUC).
+    """
     _set_status(progress="Training models...")
     feature_cols = [c for c in ALL_FEATURES if c in features.columns]
     logger.info("Training with %d features: %s", len(feature_cols), feature_cols)
@@ -204,6 +227,7 @@ def train_models(features: pd.DataFrame) -> pd.DataFrame:
 
 
 def _resolve_abbr(name: str) -> str:
+    """Převede plný název týmu nebo nestandardní zkratku na kanonickou 3-písmennou zkratku."""
     fixed = TEAM_NAME_TO_ABBR.get(name)
     if fixed:
         return fixed
@@ -211,6 +235,11 @@ def _resolve_abbr(name: str) -> str:
 
 
 def _get_team_state(latest: pd.DataFrame, team: str) -> dict | None:
+    """Vrátí poslední dostupný stav (rolling statistiky, ELO atd.) pro daný tým.
+
+    Returns:
+        Slovník hodnot posledního záznamu týmu, nebo None pokud tým v datech chybí.
+    """
     row = latest[latest["Team"] == team]
     if row.empty:
         return None
@@ -218,6 +247,11 @@ def _get_team_state(latest: pd.DataFrame, team: str) -> dict | None:
 
 
 def _is_b2b(team: str, game_date: pd.Timestamp, schedule: pd.DataFrame) -> int:
+    """Detekuje back-to-back situaci: tým hrál zápas i den předcházející game_date.
+
+    Returns:
+        1 pokud tým hrál den předtím, jinak 0.
+    """
     prev = game_date - pd.Timedelta(days=1)
     played_prev = schedule[schedule["Date"].dt.date == prev.date()]
     for _, g in played_prev.iterrows():

@@ -58,17 +58,13 @@ def compute_team_roster_strength(data: pd.DataFrame) -> pd.DataFrame:
 
     df = data.copy()
 
-    # Detect which format we received and normalise column names
     if "team_abbr" in df.columns:
-        # Pre-processed injury format from data.injuries
         team_col = "team_abbr"
         if "player_value" not in df.columns:
             df = compute_player_value(df)
         if "availability_factor" not in df.columns:
-            # Fall back to is_available flag
             df["availability_factor"] = df["is_available"].astype(float) if "is_available" in df.columns else 1.0
     else:
-        # Raw NBA API player_stats format
         team_col = "TEAM_ABBREVIATION" if "TEAM_ABBREVIATION" in df.columns else "Team"
         df = compute_player_value(df)
         max_gp = df["GP"].max() if "GP" in df.columns else 1

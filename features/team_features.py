@@ -1,3 +1,17 @@
+"""Výpočet příznaků na úrovni týmu pro ML model.
+
+Každá funkce přijímá DataFrame se seřazenými herními logy a přidává nové sloupce.
+Vždy se používá shift(1), aby příznak zachycoval stav PŘED zápasem (žádný data leakage).
+
+Příznaky:
+- roll_*     : klouzavý průměr statistiky za posledních ROLLING_WINDOW zápasů
+- form       : podíl výher za posledních FORM_WINDOW zápasů
+- streak     : délka aktuální série výher (+n) nebo proher (−n)
+- rest_days  : počet dní od posledního zápasu
+- is_b2b     : 1 pokud rest_days ≤ 1
+- elo        : ELO rating týmu před zápasem
+"""
+
 import logging
 
 import numpy as np
@@ -13,6 +27,11 @@ ELO_INITIAL = 1500.0
 
 
 def compute_rolling_stats(df: pd.DataFrame) -> pd.DataFrame:
+    """Přidá klouzavé průměry statistik za posledních ROLLING_WINDOW zápasů.
+
+    Pro každou dostupnou stat (PTS, OPP_PTS, FG_PCT, …) přidá sloupec roll_<stat>.
+    shift(1) zajistí, že průměr neobsahuje aktuální zápas — zabraňuje data leakage.
+    """
     df = df.copy()
     stat_cols = [
         c for c in ["PTS", "OPP_PTS", "FG_PCT", "FG3_PCT", "REB", "AST", "TOV", "STL", "BLK"]
@@ -27,6 +46,7 @@ def compute_rolling_stats(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_form(df: pd.DataFrame) -> pd.DataFrame:
+    """Přidá sloupec 'form': podíl výher za posledních FORM_WINDOW zápasů (před aktuálním)."""
     df = df.copy()
     df["form"] = (
         df.groupby("Team")["Win"]
@@ -36,6 +56,11 @@ def compute_form(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_streak(df: pd.DataFrame) -> pd.DataFrame:
+    """Přidá sloupec 'streak': délka aktuální série před zápasem.
+
+    Kladná hodnota = série výher, záporná = série proher.
+    Série se resetuje po první výsledku opačného typu.
+    """
     df = df.copy()
 
     def _streak(series: pd.Series) -> pd.Series:
@@ -51,6 +76,11 @@ def compute_streak(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_rest_days(df: pd.DataFrame) -> pd.DataFrame:
+    """Přidá sloupce 'rest_days' a 'is_b2b'.
+
+    rest_days: počet dní od předchozího zápasu (první zápas dostane výchozí hodnotu 3).
+    is_b2b: 1 pokud rest_days ≤ 1 (back-to-back zápas).
+    """
     df = df.copy()
     df["rest_days"] = (
         df.groupby("Team")["Date"]
@@ -95,6 +125,12 @@ def compute_elo(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_team_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Zkompletuje všechny příznaky na úrovni týmu voláním dílčích funkcí.
+
+    Pořadí: rolling stats → form → streak → rest_days → ELO.
+    Vstupem je čistý DataFrame z DataProcessor, výstupem je rozšířený
+    DataFrame připravený pro build_matchup_differentials().
+    """
     logger.info("Computing team-level features")
     df = compute_rolling_stats(df)
     df = compute_form(df)

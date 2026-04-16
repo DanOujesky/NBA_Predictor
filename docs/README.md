@@ -10,17 +10,34 @@ Aplikace předpovídá výsledky zápasů NBA pomocí modelu strojového učení
 
 Požadavky: Python 3.10 nebo novější ([python.org](https://www.python.org/downloads/))
 
-1. Otevři složku projektu
-2. Dvojklikem spusť **`launch.bat`**
+1. Otevři terminál (cmd nebo PowerShell) ve složce projektu
+2. Spusť:
+
+```
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+```
+
 3. Po chvíli se automaticky otevře prohlížeč na `http://127.0.0.1:5000`
 
-Při prvním spuštění `launch.bat` sám nainstaluje všechny závislosti a stáhne data.
+Při prvním spuštění aplikace stáhne a zpracuje data (~2 minuty). Při dalším spuštění se otevře okamžitě a aktualizuje data na pozadí.
 
 ### Varianta B — spuštění EXE (bez Pythonu)
 
-1. Spusť **`build_exe.bat`** — vytvoří složku `dist/NBAPredictor/`
-2. Spusť **`dist/NBAPredictor/NBAPredictor.exe`**
-3. Prohlížeč se otevře automaticky
+1. Stáhni `NBAPredictor.zip` z [Releases](../../releases/latest)
+2. Rozbal archiv
+3. Spusť **`NBAPredictor.exe`**
+4. Prohlížeč se otevře automaticky
+
+### Sestavení EXE ze zdrojového kódu
+
+```
+vendor\build_exe.bat
+```
+
+Vytvoří `dist/NBAPredictor/NBAPredictor.exe` včetně ZIP archivu pro distribuci.
 
 ---
 
@@ -29,8 +46,7 @@ Při prvním spuštění `launch.bat` sám nainstaluje všechny závislosti a st
 | Tab v aplikaci | Co zobrazuje |
 |----------------|-------------|
 | **Predictions** | Predikce výsledků nadcházejících zápasů s pravděpodobností výhry |
-| **Backtest** | Přesnost modelu na historických zápasech (testovací sada) |
-| **Model Comparison** | Porovnání přesnosti všech 3 trénovaných modelů |
+| **Model Comparison** | Porovnání přesnosti natrénovaných modelů |
 | **Injury Report** | Aktuální zranění hráčů a dostupnost sestavy |
 
 Tlačítko **Refresh predictions** aktualizuje data a vygeneruje nové předpovědi.
@@ -91,13 +107,12 @@ Celkem **16 příznaků**, každý jako diferenciál (pohled z perspektivy domá
 
 ## Modely (`models/`)
 
-Trénují se automaticky 3 modely, porovnají se a uloží se nejlepší:
+Trénují se automaticky 2 modely, porovnají se a uloží se nejlepší:
 
 | Model | Třída | Ladění |
 |-------|-------|--------|
 | Logistic Regression | `LogisticModel` | GridSearchCV (parametr C, solver) |
 | Random Forest | `RandomForestModel` | RandomizedSearchCV (50 iterací) |
-| XGBoost | `XGBoostModel` | RandomizedSearchCV (50 iterací) |
 
 Hodnocení probíhá na **časovém splitu 80/20** — starší zápasy trénují, novější testují.  
 Metriky: Accuracy, ROC-AUC, F1 Score, Log Loss, 5-fold Cross-validation.  
@@ -109,7 +124,7 @@ Nejlepší model (podle ROC-AUC) se uloží do `storage/trained/best_model.pkl`.
 
 Kompletní postup — načtení dat, předzpracování, feature engineering, trénování a vyhodnocení — je zdokumentován v notebooku:
 
-**`NBA_Predictor_Colab.ipynb`** — otevři na [colab.research.google.com](https://colab.research.google.com)
+**`docs/NBA_Predictor_Colab.ipynb`** — otevři na [colab.research.google.com](https://colab.research.google.com)
 
 ---
 
@@ -136,7 +151,6 @@ NBA_Predictor/
 ├── models/              ML modely (autorský kód)
 │   ├── base.py          abstraktní třída
 │   ├── logistic.py      Logistic Regression
-│   ├── xgboost_model.py XGBoost
 │   ├── random_forest.py Random Forest
 │   └── evaluator.py     porovnání modelů
 │
@@ -145,16 +159,16 @@ NBA_Predictor/
 │
 ├── vendor/              neautorský kód
 │   ├── frontend/        webový frontend (HTML/CSS/JS)
-│   └── build/           PyInstaller konfigurace, skripty
+│   └── build_exe.bat    sestavení EXE
 │
-├── storage/             runtime data (generováno automaticky)
-│   ├── raw/             stažená data (CSV)
-│   ├── processed/       features.csv, predictions.csv
-│   └── trained/         best_model.pkl
+├── docs/                dokumentace
+│   ├── README.md        tento soubor
+│   └── NBA_Predictor_Colab.ipynb  postup tvorby modelu
 │
-├── launch.bat           spuštění aplikace
-├── build_exe.bat        sestavení EXE
-└── NBA_Predictor_Colab.ipynb  dokumentace tvorby modelu
+└── storage/             runtime data (generováno automaticky)
+    ├── raw/             stažená data (CSV)
+    ├── processed/       features.csv, predictions.csv
+    └── trained/         best_model.pkl
 ```
 
 ---
@@ -166,6 +180,6 @@ NBA_Predictor/
 | `GET /api/predictions` | Predikce nadcházejících zápasů |
 | `GET /api/models` | Porovnání natrénovaných modelů |
 | `GET /api/injuries` | Zpráva o zraněních (`?team=BOS` pro filtr) |
-| `GET /api/backtest` | Přesnost na historických zápasech |
-| `GET /api/status` | Stav systému |
+| `GET /api/teams` | Seznam všech 30 NBA týmů |
+| `GET /api/status` | Stav systému (model, data, predikce) |
 | `GET /api/update-status` | Průběh aktualizace dat |

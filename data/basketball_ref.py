@@ -138,7 +138,6 @@ class BasketballRefScraper:
                 logger.warning("Schedule parse error for %s: %s", month, exc)
             time.sleep(REQUEST_DELAY)
 
-        # Also try the playoff schedule (different URL on Basketball Reference)
         playoff_url = self.PLAYOFF_SCHEDULE_URL.format(year=CURRENT_SEASON)
         playoff_html = self.fetch_page(playoff_url)
         if playoff_html:
@@ -156,7 +155,6 @@ class BasketballRefScraper:
             except Exception as exc:
                 logger.warning("Playoff schedule parse error: %s", exc)
 
-        # Always supplement with NBA API schedule (covers playoffs and play-in games)
         try:
             from data.nba_stats import NBAStatsClient
             nba_sched = NBAStatsClient().fetch_upcoming_schedule(days_ahead=21)
@@ -169,7 +167,6 @@ class BasketballRefScraper:
             result = pd.concat(all_games).drop_duplicates(subset=["Date", "Home", "Away"]).reset_index(drop=True)
             result.to_csv(schedule_path, index=False)
             return result
-        # If scrape failed but we have a stale cache, use it rather than returning empty
         if schedule_path.exists():
             logger.warning("Schedule scrape failed; using stale cache")
             return pd.read_csv(schedule_path)

@@ -1,3 +1,13 @@
+"""Source 2: NBA Stats API klient pro stahování herních logů a statistik hráčů.
+
+Komunikuje s oficiálním NBA Stats API (stats.nba.com) přes knihovnu nba_api.
+Stahuje:
+- TeamGameLog: herní statistiky každého týmu za aktuální sezónu
+- LeagueGameLog: inkrementální update pro nové zápasy (od posledního spuštění)
+- LeagueDashPlayerStats: per-game statistiky hráčů (PTS, REB, AST, STL, BLK, TOV)
+- ScheduleLeagueV2: nadcházející zápasy jako záloha k Basketball Reference
+"""
+
 import logging
 import time
 
@@ -17,8 +27,24 @@ logger = logging.getLogger(__name__)
 
 
 class NBAStatsClient:
+    """Klient pro NBA Stats API.
+
+    Všechny metody jsou odolné vůči chybám — při selhání API vrátí prázdný
+    DataFrame místo vyhození výjimky, aby pipeline mohla pokračovat.
+    """
 
     def fetch_team_gamelogs(self, season: str | None = None) -> pd.DataFrame:
+        """Stáhne herní log každého ze 30 týmů pro danou sezónu.
+
+        Provede 30 separátních volání (jedno na tým) a výsledky sloučí.
+        Výsledek uloží do RAW_DIR/nba_api_gamelogs.csv.
+
+        Args:
+            season: Řetězec ve formátu "2025-26". Pokud None, použije CURRENT_SEASON.
+
+        Returns:
+            DataFrame s jedním řádkem na zápas na tým (tj. každý zápas 2×).
+        """
         season = season or self._season_string(CURRENT_SEASON)
         frames = []
         for abbr, team_id in NBA_TEAM_IDS.items():
@@ -73,6 +99,11 @@ class NBAStatsClient:
             return pd.DataFrame()
 
     def fetch_team_advanced_stats(self, season: str | None = None) -> pd.DataFrame:
+        """Stáhne pokročilé týmové statistiky (eFG%, TS%, pace…) z LeagueDashTeamStats.
+
+        Uloží do RAW_DIR/team_advanced.csv. Tato data v aktuální verzi
+        modelu nejsou použita jako příznaky, ale jsou k dispozici pro rozšíření.
+        """
         season = season or self._season_string(CURRENT_SEASON)
         try:
             stats = LeagueDashTeamStats(
@@ -89,6 +120,11 @@ class NBAStatsClient:
             return pd.DataFrame()
 
     def fetch_player_stats(self, season: str | None = None) -> pd.DataFrame:
+        """Stáhne per-game statistiky všech hráčů z LeagueDashPlayerStats.
+
+        Výsledek uloží do RAW_DIR/player_stats.csv a slouží jako vstup
+        pro výpočet hodnoty hráče (player_value) a dostupnosti sestavy.
+        """
         season = season or self._season_string(CURRENT_SEASON)
         try:
             stats = LeagueDashPlayerStats(
@@ -103,6 +139,11 @@ class NBAStatsClient:
             return pd.DataFrame()
 
     def fetch_team_roster(self, team_abbr: str, season: str | None = None) -> pd.DataFrame:
+        """Stáhne soupisku týmu z CommonTeamRoster.
+
+        Args:
+            team_abbr: Kanonická 3-písmenná zkratka týmu (např. "BOS").
+        """
         season = season or self._season_string(CURRENT_SEASON)
         team_id = NBA_TEAM_IDS.get(team_abbr)
         if not team_id:
@@ -152,4 +193,5 @@ class NBAStatsClient:
 
     @staticmethod
     def _season_string(year: int) -> str:
+        """Převede rok konce sezóny na formát NBA API (např. 2026 → '2025-26')."""
         return f"{year - 1}-{str(year)[-2:]}"

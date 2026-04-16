@@ -1,3 +1,5 @@
+"""Random Forest klasifikátor s randomizovaným laděním hyperparametrů."""
+
 from typing import Any
 
 import numpy as np
@@ -10,6 +12,12 @@ from models.base import BaseModel
 
 
 class RandomForestModel(BaseModel):
+    """Ensemble rozhodovacích stromů (Random Forest) pro klasifikaci výsledků zápasů.
+
+    Při auto_tune=True prohledá PARAM_GRID náhodně v 50 iteracích
+    (RandomizedSearchCV) a vybere konfiguraci s nejvyšším ROC-AUC.
+    Podpora paralelizace přes n_jobs=-1.
+    """
 
     PARAM_GRID = {
         "n_estimators": [200, 300, 400, 500, 700, 1000],
